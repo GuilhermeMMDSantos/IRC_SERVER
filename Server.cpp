@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(const std::string& host, int port): serverSocket(-1), port(port), 
+Server::Server(const std::string& host, int port): serverSocket(-1), port(port),
 host(host), isRunning(false)
 {
 	std::memset(&serverAddr, 0, sizeof(serverAddr));
@@ -39,18 +39,19 @@ void  Server::bindSocket(){
 
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(port);
-	
+
 	if (host == "0.0.0.0" || host.empty())
 		serverAddr.sin_addr.s_addr = INADDR_ANY;
 	else
-	{ //inet_pton é funcao proibida
-		if (inet_pton(AF_INET, host.c_str(), &serverAddr.sin_addr) <= 0)
-		{
+	{
+		try{
+			serverAddr.sin_addr.s_addr = stringToIpv4(host);
+		}catch(std::exception& e){
 			close(serverSocket);
-			throw std::runtime_error("Error: Invalid IP to listening");
+			throw std::runtime_error(e.what());
 		}
 	}
-	
+
 	if (bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) < 0)
 	{
 		close(serverSocket);
@@ -77,17 +78,17 @@ void Server::handleConnection(int clientSocket)
 	if (bytesRead == 0)
 		return ;
 	std::string requestLine(buffer, bytesRead);
-	
+
 	std::cout << "\n --------------- REQUEST----------" << std::endl;
 	std::cout << requestLine << std::endl;
 	std::cout << "\n ---------------------------------" << std::endl;
-	
+
 	std::string method;
 	std::string uri;
 	std::string bodyRequest;
 	std::map<std::string, std::string> headers;
 	bodyRequest = parseRequest(requestLine, method, uri, headers);
-	
+
 	std::cout << "Method: " << method << std::endl;
 	std::cout << "URI: " << uri << std::endl;
 	std::cout << "Headers: " << std::endl;
@@ -95,12 +96,12 @@ void Server::handleConnection(int clientSocket)
 		std::cout << " " << it->first <<": " << it->second << std::endl;
 	if (!bodyRequest.empty())
 		std::cout << "Body: " << bodyRequest << std::endl;
-	std::string response = "HTTP 1.1 200 Ok\r\n";
+	std::string response = "HTTP 1.0 200 Ok\r\n";
 	response+= "Content-Type: text/html\r\n";
 	response+= "Connection: close\r\n";
 	response+= "\r\n";
 	response+= "<html><header><title>webserver</title></header><body><h1>ESTÁ VIVO!</h1></body></html>";
-	
+
 	send(clientSocket, response.c_str(), response.length(), 0);
 }
 
@@ -113,29 +114,30 @@ void Server::start(){
 		setupSocket();
 		bindSocket();
 		startListening();
-		
+
 		isRunning = true;
 		std::cout << "\n=== HTTP Server started ===" << std::endl;
 		std::cout << "Addr: http://" << host << ":" << port << std::endl;
 		std::cout << "Press Ctrl+c to stop\n" << std::endl;
-		
+
 		while (isRunning)
 		{
 			sockaddr_in clientAddr;
 			socklen_t clientLen = sizeof(clientAddr);
-			
+
 			int clientSocket = accept(serverSocket, (sockaddr*)&clientAddr, &clientLen);
-			
+
 			if (clientSocket < 0)
 			{
 				std::cerr << "Error: cant't accept connection" << std::endl;
 				continue;
 			}
-			
-			char clientIP[INET_ADDRSTRLEN];
-			inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, INET_ADDRSTRLEN);
+
+			unsigned int rawIp = clientAddr.sin_addr.s_addr;
+			unsigned int hostIp = ntohl(rawIp);
+			std::string clientIP = ipv4ToString(hostIp);
 			std::cout << "\n[New connection] Client: " << clientIP << ":" << ntohs(clientAddr.sin_port) << std::endl;
-			
+
 			handleConnection(clientSocket);
 			close(clientSocket);
 			std::cout << "[Connection clesed] Client: " << clientIP << std::endl;
@@ -159,12 +161,12 @@ std::string Server::parseRequest(const std::string& requestLine, std::string& me
 	if (std::getline(stream, line)){
 		if(!line.empty() && line[line.length() - 1] == '\r')
 			line = line.substr(0, line.length() - 1);
-		
+
 		std::istringstream lineStream(line);
 		std::string httpVersion;
 		lineStream >> method >> uri >> httpVersion;
 	}
-	
+
 	while (std::getline(stream, line)){
 		if(!line.empty() && line[line.length() - 1] == '\r')
 			line = line.substr(0, line.length() - 1);
@@ -181,7 +183,7 @@ std::string Server::parseRequest(const std::string& requestLine, std::string& me
 			headers[key] = value;
 		}
 	}
-	
+
 	std::string bodyRequest = "";
 	while (std::getline(stream, line)){
 		bodyRequest += line + "\n";

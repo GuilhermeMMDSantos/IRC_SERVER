@@ -15,6 +15,7 @@
 #include <arpa/inet.h>
 #include <sstream>
 #include <csignal>
+#include "utils.hpp"
 
 class Server{
 	private:
@@ -23,17 +24,17 @@ class Server{
 		std::string host;
 		sockaddr_in serverAddr;
 		bool isRunning;
-		
+
 		void setupSocket();
 		void bindSocket();
 		void startListening();
 		std::string parseRequest(const std::string& requestLine, std::string& method, std::string& uri, std::map<std::string, std::string>& headers);
-		
+
 	public:
-		
+
 		Server(const std::string& host, int port);
 		~Server();
-		
+
 		void start();
 		void stop();
 		void handleConnection(int clientSocket);
