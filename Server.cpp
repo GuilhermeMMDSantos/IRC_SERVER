@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
-Server::Server(const std::string& host, int port): serverSocket(-1), port(port),
-host(host), isRunning(false)
+Server::Server(int port, const std::string& password)
+: serverSocket(-1), port(port), password(password), isRunning(false)
 {
 	std::memset(&serverAddr, 0, sizeof(serverAddr));
 }
@@ -13,13 +13,23 @@ Server::~Server()
 
 void Server::stop()
 {
-	if (serverSocket >= 0)
-	{
-		close(serverSocket);
-		serverSocket = -1;
-	}
 	isRunning = false;
-	std::cout << "Web server stop!" << std::endl;
+	for (size_t i = 0; i < fds.size(); i++){
+		if (fds[i].fd >= 0)
+			close(fds[i].fd);
+	}
+	fds.clear();
+	recvBuf.clear();
+	serverSocket = -1;
+	std::cout << "Server stoped!" << std::endl;
+}
+
+void Server::setNonBlocking(int fd){
+	int flags = fcntl(fd, F_GETFL, 0);
+	if (flags < 0)
+		throw std::runtime_error("Error: fcntl F_GETFL failed");
+	if (fntcl(fd, FSETFL, flags | O_NONBLOCK) < 0)
+		throw std::runtime_error("Error: fcntl F_SETFL O_NONBLOCK failed");
 }
 
 void Server::setupSocket()
@@ -28,34 +38,24 @@ void Server::setupSocket()
 	if (serverSocket < 0)
 		throw std::runtime_error("Error: Can't create socket");
 	int opt = 1;
-	if (setsockopt(serverSocket, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)) < 0)
+	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 	{
 		close(serverSocket);
 		throw std::runtime_error("Error: Can't config socket");
 	}
+	setNonBlocking(serverSocket);
 }
 
 void  Server::bindSocket(){
 
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(port);
-
-	if (host == "0.0.0.0" || host.empty())
-		serverAddr.sin_addr.s_addr = INADDR_ANY;
-	else
-	{
-		try{
-			serverAddr.sin_addr.s_addr = stringToIpv4(host);
-		}catch(std::exception& e){
-			close(serverSocket);
-			throw std::runtime_error(e.what());
-		}
-	}
+	serverAddr.sin_addr.s_addr = INADDR_ANY;
 
 	if (bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) < 0)
 	{
 		close(serverSocket);
-		throw std::runtime_error("Error: Can't bind socket to IP&Port");
+		throw std::runtime_error("Error: Can't bind socket");
 	}
 }
 
@@ -68,44 +68,68 @@ void Server::startListening()
 	}
 }
 
-void Server::handleConnection(int clientSocket)
-{
-	char buffer[BUFFER_SIZE];
-	std::memset(buffer, 0, BUFFER_SIZE);
-	ssize_t bytesRead = recv(clientSocket, buffer, BUFFER_SIZE - 1, 0);
-	if (bytesRead < 0)
-		throw std::runtime_error("Error: Cant't read data in socket");
-	if (bytesRead == 0)
-		return ;
-	std::string requestLine(buffer, bytesRead);
+void Server::acceptClient(){
+	sockaddr_in clientAddr;
+	socklen_t clientLen = sizeof(clientAddr);
 
-	std::cout << "\n --------------- REQUEST----------" << std::endl;
-	std::cout << requestLine << std::endl;
-	std::cout << "\n ---------------------------------" << std::endl;
+	int clientFd = accept(serverSocket, (sockaddr*)&clientAddr, &clientlen);
+	if (clientFd < 0){
+		std::cerr << "Warning: accept() failed" << std::endl;
+		return;
+	}
+	setNonBlocking(clientFd);
+	pollfd pfd;
+	pfd.fd = clientFd;
+	pfd.events = POLLIN;
+	pfd.revents = 0;
+	fds.push_back(pfd);
+	recvBuf[clientFd] = "";
 
-	std::string method;
-	std::string uri;
-	std::string bodyRequest;
-	std::map<std::string, std::string> headers;
-	bodyRequest = parseRequest(requestLine, method, uri, headers);
-
-	std::cout << "Method: " << method << std::endl;
-	std::cout << "URI: " << uri << std::endl;
-	std::cout << "Headers: " << std::endl;
-	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-		std::cout << " " << it->first <<": " << it->second << std::endl;
-	if (!bodyRequest.empty())
-		std::cout << "Body: " << bodyRequest << std::endl;
-	std::string response = "HTTP 1.0 200 Ok\r\n";
-	response+= "Content-Type: text/html\r\n";
-	response+= "Connection: close\r\n";
-	response+= "\r\n";
-	response+= "<html><header><title>webserver</title></header><body><h1>ESTÁ VIVO!</h1></body></html>";
-
-	send(clientSocket, response.c_str(), response.length(), 0);
+	std::cout << "[+] New client connected: fd=" << clientFd 
+	<< " IP=" << inet_ntoa(clientAddr.sin_addr)
+	<< ":" << ntohs(clientAddr.sin.port) << std::endl; 
 }
 
+void Server::disconnectClient(int fd){
+	std::cout << "[-] Client disconnected: fd=" << fd << std::endl;
+	close(fd);
+	recvBuf.erase(fd);
+	for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); ++it){
+		if (it->fd == fd){
+			fds.erase(it);
+			break;
+		}
+	}
+}
 
+void Server::handleClient(int fd){
+	
+	char buf[BUFFER_SIZE];
+	ssize_t bytesRead = recv(fd, buf, sizeof(buf) - 1, 0);
+
+	if (bytesRead <= 0){
+		disconnectClient(fd);
+		return ;
+	}
+
+	buf[bytesRead] = '\0';
+	recvBuf[fd] += std::string(buf, bytesRead);
+	std::string& accumulated = recvBuf[fd];
+	size_t pos;
+	while ( (pos = accumulated.find('\n')) != std::string::npos ){
+		std::string message = accumulated.substr(0, pos);
+		accumulated = accumulated.substr(pos + 1);
+
+		if (!message.empty() && message[message.size() - 1] == '\r')
+			message.erase(message.size() - 1);
+		if (!message.empty())
+			processMessage(fd, message);
+	}
+}
+
+void Server::processMessage(int fd, const std::string& message){
+	std::cout << "[fd=" << fd << "] >>" << message << std::endl; 
+}
 
 void Server::start(){
 
@@ -115,32 +139,33 @@ void Server::start(){
 		bindSocket();
 		startListening();
 
-		isRunning = true;
-		std::cout << "\n=== HTTP Server started ===" << std::endl;
-		std::cout << "Addr: http://" << host << ":" << port << std::endl;
-		std::cout << "Press Ctrl+c to stop\n" << std::endl;
+		pollfd serverPfd;
+		serverPfd.fd = serverSocket;
+		serverPfd.events = POLLIN;
+		serverPfd.revents = 0;
+		fds.push_back(serverPfd);
 
+		isRunning = true;
+		std::cout << "=== IRC Server started ===" << std::endl;
+		std::cout << "Port: " << port << std::endl;
+		std::cout << "Press Ctrl+C to stop\n" << std::endl;
 		while (isRunning)
 		{
-			sockaddr_in clientAddr;
-			socklen_t clientLen = sizeof(clientAddr);
-
-			int clientSocket = accept(serverSocket, (sockaddr*)&clientAddr, &clientLen);
-
-			if (clientSocket < 0)
-			{
-				std::cerr << "Error: cant't accept connection" << std::endl;
+			int ready = poll(fds.data(), fds.size(), -1);
+			if (ready < 0){
+				std::cerr << "Warning: poll interrupted" << std::endl;
 				continue;
 			}
 
-			unsigned int rawIp = clientAddr.sin_addr.s_addr;
-			unsigned int hostIp = ntohl(rawIp);
-			std::string clientIP = ipv4ToString(hostIp);
-			std::cout << "\n[New connection] Client: " << clientIP << ":" << ntohs(clientAddr.sin_port) << std::endl;
-
-			handleConnection(clientSocket);
-			close(clientSocket);
-			std::cout << "[Connection clesed] Client: " << clientIP << std::endl;
+			size_t currentSize = fds.size();
+			for (size_t i = 0; i < currentSize; ++i){
+				if (fds[i].revents == 0)
+					continue;
+				if (fds[i].fd == serverSocket)
+					acceptClient();
+				else
+					handleClient(fds[i].fd);
+			}
 		}
 	}
 	catch(const std::exception& e)
@@ -148,45 +173,4 @@ void Server::start(){
 		std::cerr << "Error: " << e.what() << std::endl;
 		stop();
 	}
-}
-
-
-
-//PARSE DA REQUEST FICA NO OUTRO OBJETO
-std::string Server::parseRequest(const std::string& requestLine, std::string& method, std::string& uri, std::map<std::string, std::string>& headers)
-{
-
-	std::istringstream stream(requestLine);
-	std::string line;
-	if (std::getline(stream, line)){
-		if(!line.empty() && line[line.length() - 1] == '\r')
-			line = line.substr(0, line.length() - 1);
-
-		std::istringstream lineStream(line);
-		std::string httpVersion;
-		lineStream >> method >> uri >> httpVersion;
-	}
-
-	while (std::getline(stream, line)){
-		if(!line.empty() && line[line.length() - 1] == '\r')
-			line = line.substr(0, line.length() - 1);
-		if (line.empty())
-			break;
-		size_t separatorPos = line.find(':');
-		if ( separatorPos != std::string::npos)
-		{
-			std::string key = line.substr(0, separatorPos);
-			std::string value = line.substr(separatorPos + 1);
-			size_t firstLetterPos = value.find_first_not_of(" \t");
-			if (firstLetterPos != std::string::npos)
-				value = value.substr(firstLetterPos);
-			headers[key] = value;
-		}
-	}
-
-	std::string bodyRequest = "";
-	while (std::getline(stream, line)){
-		bodyRequest += line + "\n";
-	}
-	return bodyRequest;
 }
