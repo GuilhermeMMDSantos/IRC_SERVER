@@ -128,7 +128,9 @@ void Server::handleClient(int fd){
 }
 
 void Server::processMessage(int fd, const std::string& message){
-	std::cout << "[fd=" << fd << "] >>" << message << std::endl; 
+	std::cout << "[fd=" << fd << "] >>" << message << std::endl;
+	//Aqui onde vai ser feito o parse da mensagem para extrairmos os comandos e companhia!
+	//Depois vamos criar logica para cada comando
 }
 
 void Server::start(){
