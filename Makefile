@@ -12,10 +12,10 @@
 
 CC = c++
 FLAGS = -Wall -Wextra -Werror -std=c++98
-NAME = IRC
-SRCS = main.cpp Server.cpp utils.cpp
+NAME = ircserv
+SRCS = main.cpp Server.cpp
 OBJS = $(SRCS:.cpp=.o)
-HEADERS = Server.hpp utils.hpp
+HEADERS = Server.hpp
 
 all: $(NAME)
 %.o:%.cpp $(HEADERS)

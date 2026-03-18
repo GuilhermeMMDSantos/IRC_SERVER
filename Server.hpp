@@ -11,6 +11,7 @@
 #include <sstream>
 #include <vector>
 #include <stdexcept>
+#include <cstring>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -18,12 +19,11 @@
 #include <fcntl.h>
 #include <poll.h>
 
-
 class Server{
 	private:
 		int serverSocket;
 		int port;
-		std::string password
+		std::string password;
 		sockaddr_in serverAddr;
 		bool isRunning;
 		std::vector<pollfd> fds;

@@ -28,7 +28,7 @@ void Server::setNonBlocking(int fd){
 	int flags = fcntl(fd, F_GETFL, 0);
 	if (flags < 0)
 		throw std::runtime_error("Error: fcntl F_GETFL failed");
-	if (fntcl(fd, FSETFL, flags | O_NONBLOCK) < 0)
+	if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0)
 		throw std::runtime_error("Error: fcntl F_SETFL O_NONBLOCK failed");
 }
 
@@ -70,7 +70,7 @@ void Server::startListening()
 
 void Server::acceptClient(){
 	sockaddr_in clientAddr;
-	socklen_t clientLen = sizeof(clientAddr);
+	socklen_t clientlen = sizeof(clientAddr);
 
 	int clientFd = accept(serverSocket, (sockaddr*)&clientAddr, &clientlen);
 	if (clientFd < 0){
@@ -87,7 +87,7 @@ void Server::acceptClient(){
 
 	std::cout << "[+] New client connected: fd=" << clientFd 
 	<< " IP=" << inet_ntoa(clientAddr.sin_addr)
-	<< ":" << ntohs(clientAddr.sin.port) << std::endl; 
+	<< ":" << ntohs(clientAddr.sin_port) << std::endl; 
 }
 
 void Server::disconnectClient(int fd){
