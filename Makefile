@@ -12,7 +12,7 @@
 
 CC = c++
 FLAGS = -Wall -Wextra -Werror -std=c++98
-NAME = webserv
+NAME = ircserv
 SRCS = main.cpp Server.cpp
 OBJS = $(SRCS:.cpp=.o)
 HEADERS = Server.hpp
@@ -24,7 +24,7 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	@$(CC) $(FLAGS) $(OBJS) -o $(NAME)
 	@clear
-	@echo "Webserver compiled."
+	@echo "IRC SERVER compiled."
 
 clean:
 	@rm -f $(OBJS)
