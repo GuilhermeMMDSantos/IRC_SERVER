@@ -11,12 +11,12 @@ void signalHandler(int signum){
 		globalServer->stop();
 }
 
-bool isValidPort(const std::string& str, int& port){
+bool isValidPort(const std::string& str){
 	for (size_t i = 0; i < str.size(); ++i){
 		if (str[i] < '0' || str[i] > '9')
 			return false;
 	}
-	port = std::atoi(str.c_str());
+	int port = std::atoi(str.c_str());
 	return (port >= 1 && port <= 65535);
 }
 
@@ -27,9 +27,8 @@ int main(int argc, char* argv[])
 		std::cerr << "exec: ./ircserv <port> <password>" << std::endl;
 		return 1;
 	}
-	
-	int port;
-	if (!isValidPort(argv[1], port)){
+
+	if (!isValidPort(argv[1])){
 		std::cerr << "Error: invalid port '" << argv[1] << "' (must be 1 - 65535)" << std::endl;
 		return 1;
 	}
@@ -41,10 +40,10 @@ int main(int argc, char* argv[])
 	}
 	signal(SIGINT, signalHandler);
 	signal(SIGTERM, signalHandler);
-	
+
 	try
 	{
-		Server server(port, password);
+		Server server(argv[1], password);
 		globalServer = &server;
 		server.start();
 	}
@@ -53,6 +52,6 @@ int main(int argc, char* argv[])
 		std::cerr << "Fatal Error: " << e.what() << std::endl;
 		return 1;
 	}
-	
+
 	return 0;
 }
