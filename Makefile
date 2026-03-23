@@ -1,6 +1,10 @@
 CC      = c++
-CFLAGS  = -Wall -Wextra -Werror -std=c++98
-NAME    = ircserv
+CFLAGS  = -Wall -Wextra -Werror -std=c++98 -g
+DEBUG ?= 0
+ifeq ($(DEBUG),1)
+	CFLAGS += -g -DDEBUG
+endif
+NAME	= ircserv
 
 SRC_DIR = srcs
 OBJ_DIR = objs
@@ -13,11 +17,12 @@ SRCS = \
 	$(SRC_DIR)/client/ClientConnection.cpp \
 	$(SRC_DIR)/client/ClientIdentity.cpp \
 	$(SRC_DIR)/client/ClientManager.cpp \
-	$(SRC_DIR)/client/ClientState.cpp
+	$(SRC_DIR)/client/ClientState.cpp \
+	$(SRC_DIR)/Message.cpp
 
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-INCLUDES = \
+INCLUDES = -I$(SRC_DIR) \
 	-I$(SRC_DIR)/server \
 	-I$(SRC_DIR)/socket \
 	-I$(SRC_DIR)/client

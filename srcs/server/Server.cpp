@@ -77,8 +77,21 @@ void Server::handleClient(int fd){
 
 void Server::processMessage(int fd, const std::string& message){
 	std::cout << "[fd=" << fd << "] >>" << message << std::endl;
-	//Aqui onde vai ser feito o parse da mensagem para extrairmos os comandos e companhia!
-	//Depois vamos criar logica para cada comando
+	Message	msg;
+	if (!msg.parse(message)){
+		msg.clear();
+		std::cerr << "Warning: command invalid" << std::endl;
+		return;
+	}
+
+	//Tudo abaixo é para teste!! Apartir daqui pode usar a objecto msg (tipo class Message) para executar os comandos. 
+	std::cout << "Prefix: " << msg.getPrefix() << std::endl;
+	std::cout << "Command: " << msg.getCommand() << std::endl;
+	std::vector<std::string> params = msg.getParams();
+	std::cout << "Param ";
+	for (size_t i = 0; i <	params.size(); ++i)
+		std::cout << i << ":[" << params[i] << " ] ";
+	std::cout << "\n";
 }
 
 void Server::start(){
@@ -101,7 +114,8 @@ void Server::start(){
 		while (isRunning)
 		{
 			int ready = poll(fds.data(), fds.size(), -1);
-			if (ready < 0){
+			if (ready < 0 ){
+				if (errno == EINTR) continue;
 				std::cerr << "Warning: poll interrupted" << std::endl;
 				continue;
 			}

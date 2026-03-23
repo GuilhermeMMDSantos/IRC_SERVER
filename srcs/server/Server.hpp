@@ -4,10 +4,12 @@
 #define MAX_CONNECTIONS 128
 #define BUFFER_SIZE 4096
 
+#include <cerrno>
 #include <vector>
 #include <poll.h>
 #include "Socket.hpp"
 #include "ClientManager.hpp"
+#include "Message.hpp"
 
 class Server{
 	private:
