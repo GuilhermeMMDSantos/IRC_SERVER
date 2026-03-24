@@ -3,13 +3,14 @@
 
 class ClientState
 {
-	private:
-		bool	isPassWordOk;
-		bool	isNickNameOk;
-		bool	isUserNameOk;
-
 	public:
-		ClientState(bool p = false, bool n = false, bool u = false);
+		bool	hasPassWord;
+		bool	hasNickName;
+		bool	hasUserName;
+		bool	isRegisted;
+
+		ClientState();
+
 };
 
 #endif

@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 Server::Server(const char *port, const std::string& password)
-:_socket(port), password(password), isRunning(false)
+:_socket(port), _password(password), isRunning(false)
 {
 
 }
@@ -9,6 +9,10 @@ Server::Server(const char *port, const std::string& password)
 Server::~Server()
 {
 	stop();
+}
+
+std::string	Server::getPassword() const{
+	return _password;
 }
 
 void Server::stop()
@@ -66,7 +70,11 @@ void Server::handleClient(int fd){
 	}
 
 	buf[bytesRead] = '\0';
-	_clientMgr.updaterecvQ(fd, std::string(buf, bytesRead));
+
+	if (!_clientMgr.updaterecvQ(fd, std::string(buf, bytesRead))){
+		disconnectClient(fd);
+		return;
+	}
 
 	std::string message;
 	while (_clientMgr.extractMessage(fd, message)){
@@ -79,19 +87,23 @@ void Server::processMessage(int fd, const std::string& message){
 	std::cout << "[fd=" << fd << "] >>" << message << std::endl;
 	Message	msg;
 	if (!msg.parse(message)){
-		msg.clear();
 		std::cerr << "Warning: command invalid" << std::endl;
 		return;
 	}
-
-	//Tudo abaixo é para teste!! Apartir daqui pode usar a objecto msg (tipo class Message) para executar os comandos. 
-	std::cout << "Prefix: " << msg.getPrefix() << std::endl;
-	std::cout << "Command: " << msg.getCommand() << std::endl;
-	std::vector<std::string> params = msg.getParams();
-	std::cout << "Param ";
-	for (size_t i = 0; i <	params.size(); ++i)
-		std::cout << i << ":[" << params[i] << " ] ";
-	std::cout << "\n";
+	Client* client = _clientMgr.getClient(fd);
+	if (!client){
+		std::cerr << "Warning: client not found for fd: " << fd << std::endl;
+		return;
+	}
+	_executor.execute(*this, *client, msg);
+	//Tudo abaixo é para teste!! Apartir daqui pode usar a objecto msg (tipo class Message) para executar os comandos.
+	// std::cout << "Prefix: " << msg.getPrefix() << std::endl;
+	// std::cout << "Command: " << msg.getCommand() << std::endl;
+	// std::vector<std::string> params = msg.getParams();
+	// std::cout << "Param ";
+	// for (size_t i = 0; i <	params.size(); ++i)
+	// 	std::cout << i << ":[" << params[i] << " ] ";
+	// std::cout << "\n";
 }
 
 void Server::start(){
@@ -136,4 +148,23 @@ void Server::start(){
 		std::cerr << "Error: " << e.what() << std::endl;
 		stop();
 	}
+}
+
+void Server::sendMessage(Client& client, const std::string& msg){
+	std::string message = msg + "\r\n";
+	const char* buffer = message.c_str();
+	size_t total = message.size();
+	size_t sent = 0;
+	while (sent < total){
+		ssize_t bytes = send(client.getFd(), buffer + sent, total - sent, 0);
+		if (bytes <= 0){
+			std::cerr << "send() falied\n";
+			break ;
+		}
+		sent += bytes;
+	}
+}
+
+bool	Server::isNickAvailable(const std::string& nick) const{
+	return _clientMgr.isNickUnique(nick);
 }

@@ -12,11 +12,12 @@ class ClientManager
 	public:
 		void	addClient(const ClientConnection& connection, std::string recvQ = "");
 		void	removeClient(int fd);
-		void	updaterecvQ(int fd, std::string recvBuf);
+		bool	updaterecvQ(int fd, std::string recvBuf);
 		bool	extractMessage(int fd, std::string& line);
 		Client*	getClient(int fd);
 		std::map<int, Client>& getAllClient();
 		void	clear();
+		bool	isNickUnique(const std::string&) const;
 };
 
 #endif

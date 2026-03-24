@@ -65,7 +65,7 @@ bool	Message::parseTrailing(const std::string&msg, std::string& trail){
 		trail += msg[_pos];
 		++_pos;
 	}
-	return !trail.empty();
+	return true;
 }
 
 bool	Message::parseMiddle(const std::string& msg, std::string& middle){
@@ -96,6 +96,7 @@ bool Message::parseParams(const std::string& msg){
 }
 
 bool	Message::parse(const std::string& msg){
+	_pos = 0;
 	if (msg.empty()) return false;
 
 	if(!parsePrefix(msg))	return (clear(), false);

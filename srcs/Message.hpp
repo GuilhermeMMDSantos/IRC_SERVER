@@ -20,7 +20,7 @@ class Message
 		bool	parseTrailing(const std::string&msg, std::string& trail);
 		bool	parseMiddle(const std::string& msg, std::string& middle);
 		bool	parseParams(const std::string& msg);
-		// bool	parseTrailing();
+
 	public:
 		Message();
 

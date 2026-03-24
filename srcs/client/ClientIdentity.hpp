@@ -10,10 +10,10 @@ class ClientIdentity
 		std::string	_nickname;
 
 	public:
-		ClientIdentity();
-		~ClientIdentity();
-
-
+		const std::string&	getNickName() const;
+		const std::string&	getUserName() const;
+		void		updateNickName(const std::string&);
+		void		updateUserName(const std::string&);
 };
 
 #endif

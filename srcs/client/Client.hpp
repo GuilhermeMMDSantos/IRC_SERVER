@@ -14,11 +14,23 @@ class Client
 		ClientIdentity		_identity;
 		ClientState			_states;
 
+		bool	nickAlreadyExist(const std::string&);
 	public:
 		Client(const ClientConnection& connection, std::string recvQ = "");
 
-		void	updaterecvQ(std::string recvBuf);
+		bool	updaterecvQ(std::string recvBuf);
 		bool	extractMessage(std::string& line);
+
+		bool	isRegisted() const;
+		bool	hasPassword() const;
+		bool	hasNick() const;
+		bool	hasUser() const;
+		void	passwordConfirmed();
+		void	updateNick(const std::string&);
+		void	updateUser(const std::string&);
+		int		getFd() const;
+		std::string	getNickName() const;
+
 };
 
 #endif

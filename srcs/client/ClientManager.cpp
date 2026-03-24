@@ -20,10 +20,11 @@ std::map<int, Client>& ClientManager::getAllClient(){
 	return _clients;
 }
 
-void	ClientManager::updaterecvQ(int fd, std::string recvBuf){
+bool	ClientManager::updaterecvQ(int fd, std::string recvBuf){
 	std::map<int, Client>::iterator it = _clients.find(fd);
 	if (it != _clients.end())
-		it->second.updaterecvQ(recvBuf);
+		if (!it->second.updaterecvQ(recvBuf)) return false;
+	return true;
 }
 
 bool	ClientManager::extractMessage(int fd, std::string& line){
@@ -35,4 +36,13 @@ bool	ClientManager::extractMessage(int fd, std::string& line){
 
 void	ClientManager::clear(){
 	_clients.clear();
+}
+
+bool	ClientManager::isNickUnique(const std::string& nick) const{
+	std::map<int, Client>::const_iterator it;
+	for (it = _clients.begin(); it != _clients.end(); it++){
+		if (it->second.getNickName() == nick)
+			return false;
+	}
+	return true;
 }

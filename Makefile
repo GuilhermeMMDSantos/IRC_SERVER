@@ -18,7 +18,8 @@ SRCS = \
 	$(SRC_DIR)/client/ClientIdentity.cpp \
 	$(SRC_DIR)/client/ClientManager.cpp \
 	$(SRC_DIR)/client/ClientState.cpp \
-	$(SRC_DIR)/Message.cpp
+	$(SRC_DIR)/Message.cpp \
+	$(SRC_DIR)/Executor.cpp
 
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
