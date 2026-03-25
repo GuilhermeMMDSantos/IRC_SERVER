@@ -37,7 +37,7 @@ bool	Executor::isValidNick(const std::string& nick){
 }
 
 void	Executor::nick(Server& server, Client& client, const Message& msg){
-	if (!client.hasPassword()){
+	if (!client.isRegisted()){
 		server.sendMessage(client, ":ircserv 451 * :You have not registered (need PASS)");
 		return;
 	}

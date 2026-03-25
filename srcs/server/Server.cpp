@@ -1,9 +1,12 @@
 #include "Server.hpp"
 
 Server::Server(const char *port, const std::string& password)
-:_socket(port), _password(password), isRunning(false)
+:_socket(port), _password(password), _isRunning(false)
 {
-
+	_tmpfd = open("/dev/null", O_RDONLY);
+	if (_tmpfd < 0){
+		throw std::runtime_error("open /dev/null");
+	}
 }
 
 Server::~Server()
@@ -17,8 +20,8 @@ std::string	Server::getPassword() const{
 
 void Server::stop()
 {
-	if (!isRunning) return;
-	isRunning = 0;
+	if (!_isRunning) return;
+	_isRunning = 0;
 	for (size_t i = 0; i < fds.size(); i++){
 		if (fds[i].fd >= 0)
 			close(fds[i].fd);
@@ -33,7 +36,21 @@ void Server::acceptClient(){
 	ClientConnection client = _socket.acceptClient();
 	int clientfd = client.getfd();
 	if (clientfd < 0){
-		std::cerr << "Warning: accept() failed" << std::endl;
+		if (errno == EMFILE || errno == ENFILE){
+			close(_tmpfd);
+			client.clear();
+			client = _socket.acceptClient();
+			clientfd = client.getfd();
+			if (clientfd < 0){
+				close(clientfd);
+			}
+			_tmpfd = open("/dev/null", O_RDONLY);
+			if (_tmpfd < 0){
+				std::cerr << "Error: open /dev/null\n";
+				stop();
+			}
+		} else
+			std::cerr << "Warning: accept() failed" << std::endl;
 		return;
 	}
 	pollfd pfd;
@@ -119,11 +136,11 @@ void Server::start(){
 		pfd.revents = 0;
 		fds.push_back(pfd);
 
-		isRunning = true;
+		_isRunning = true;
 		std::cout << "=== IRC Server started ===" << std::endl;
 		std::cout << "Port: " << _socket.getPort() << std::endl;
 		std::cout << "Press Ctrl+C to stop\n" << std::endl;
-		while (isRunning)
+		while (_isRunning)
 		{
 			int ready = poll(fds.data(), fds.size(), -1);
 			if (ready < 0 ){

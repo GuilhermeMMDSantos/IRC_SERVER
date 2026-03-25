@@ -18,8 +18,10 @@ class Server{
 		ClientManager		_clientMgr;
 		Executor			_executor;
 		const std::string	_password;
-		bool				isRunning;
+		bool				_isRunning;
 		std::vector<pollfd>	fds;
+		int					_tmpfd;
+
 
 		void acceptClient();
 		void handleClient(int fd);

@@ -38,8 +38,11 @@ int main(int argc, char* argv[])
 		std::cout << "Error: password connot be empty" << std::endl;
 		return 1;
 	}
+
 	signal(SIGINT, signalHandler);
 	signal(SIGTERM, signalHandler);
+	signal(SIGQUIT, signalHandler);
+	signal(SIGPIPE, SIG_IGN);
 
 	try
 	{
