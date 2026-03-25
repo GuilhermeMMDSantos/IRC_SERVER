@@ -11,8 +11,7 @@ Executor::Executor(){
 
 void	Executor::pass(Server& server, Client& client, const Message& msg){
 	std::string pwd = server.getPassword();
-
-	if (msg.getParams().size() > 1){
+	if (msg.getParams().size() < 1){
 		server.sendMessage(client, ":ircserv 461 * PASS :Not enough parameters");
 		return ;
 	}
@@ -37,7 +36,7 @@ bool	Executor::isValidName(const std::string& nick){
 }
 
 void	Executor::nick(Server& server, Client& client, const Message& msg){
-	if (!client.isRegisted()){
+	if (client.isRegisted()){
 		server.sendMessage(client, ":ircserv 462 * :You have not registered (need PASS)");
 		return;
 	}
@@ -63,7 +62,7 @@ void	Executor::nick(Server& server, Client& client, const Message& msg){
 }
 
 void	Executor::user(Server& server, Client& client, const Message& msg){
-	if (!client.isRegisted()){
+	if (client.isRegisted()){
 		server.sendMessage(client, ":ircserv 462 * :You have not registered (need PASS)");
 		return;
 	}
@@ -79,11 +78,11 @@ void	Executor::user(Server& server, Client& client, const Message& msg){
 	client.updateUser(m);
 	client.updateRealName(msg.getParams()[3]);
 	client.userCreated();
-
+	welcome(server, client);
 }
 
 void	Executor::welcome(Server& server, Client& client){
-	if (!client.isRegisted()) return;
+	if (client.isRegisted()) return;
 	if (!client.hasNick() && !client.hasUser()) return ;
 	if (!server.getPassword().empty() && !client.hasPassword()){
 		server.sendMessage(client, ":ircserv 464 * :Password incorrect");
@@ -92,7 +91,7 @@ void	Executor::welcome(Server& server, Client& client){
 	}
 	client.registreConfirmed();
 
-	std::string srvName = "ft_irc_server";
+	std::string srvName = "ircserv";
 	std::string nick = client.getNickName();
 	std::string user = client.getUserName();
 	std::string host = client.getIP();

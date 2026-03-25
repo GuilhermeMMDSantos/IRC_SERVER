@@ -28,6 +28,7 @@ void Server::stop()
 	}
 	fds.clear();
 	_clientMgr.clear();
+	close(_tmpfd);
 	close(_socket.getSockFd());
 	std::cout << "Server stoped!" << std::endl;
 }
