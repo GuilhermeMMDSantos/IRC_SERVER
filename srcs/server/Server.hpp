@@ -25,7 +25,6 @@ class Server{
 
 		void acceptClient();
 		void handleClient(int fd);
-		void disconnectClient(int fd);
 		void processMessage(int fd, const std::string& message);
 	public:
 
@@ -34,6 +33,7 @@ class Server{
 
 		void	start();
 		void	stop();
+		void	disconnectClient(int fd);
 
 		std::string	getPassword() const;
 		bool		isNickAvailable(const std::string&) const;

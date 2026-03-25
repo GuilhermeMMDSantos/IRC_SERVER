@@ -14,3 +14,10 @@ void		ClientIdentity::updateUserName(const std::string& user){
 	_username.clear();
 	_username = user;
 }
+
+void		ClientIdentity::updateRealName(const std::string& real){
+	_realname.clear();
+	_realname = real;
+}
+
+

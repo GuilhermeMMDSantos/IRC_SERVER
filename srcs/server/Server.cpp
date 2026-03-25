@@ -41,7 +41,7 @@ void Server::acceptClient(){
 			client.clear();
 			client = _socket.acceptClient();
 			clientfd = client.getfd();
-			if (clientfd < 0){
+			if (clientfd >= 0){
 				close(clientfd);
 			}
 			_tmpfd = open("/dev/null", O_RDONLY);

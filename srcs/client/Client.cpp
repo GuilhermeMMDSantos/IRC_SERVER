@@ -53,6 +53,14 @@ void	Client::passwordConfirmed(){
 	_states.hasPassWord = true;
 }
 
+void	Client::nickCreated(){
+	_states.hasNickName = true;
+}
+
+void	Client::userCreated(){
+	_states.hasUserName = true;
+}
+
 
 void	Client::updateNick(const std::string& nick){
 	_identity.updateNickName(nick);
@@ -60,4 +68,19 @@ void	Client::updateNick(const std::string& nick){
 
 void	Client::updateUser(const std::string& nick){
 	_identity.updateUserName(nick);
+}
+
+void	Client::updateRealName(const std::string& nick){
+	_identity.updateRealName(nick);
+}
+
+void	Client::registreConfirmed(){
+	_states.isRegisted = true;
+}
+
+std::string	Client::getUserName() const{
+	return _identity.getUserName();
+}
+std::string	Client::getIP() const{
+	return _connection.getIP();
 }
