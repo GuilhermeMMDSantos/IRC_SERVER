@@ -1,43 +1,52 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: gudos-sa <marvin@42.fr>                    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/01/17 15:22:24 by gudos-sa          #+#    #+#              #
-#    Updated: 2026/01/17 15:22:30 by gudos-sa         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
+CC      = c++
+CFLAGS  = -Wall -Wextra -Werror -std=c++98 -g
+DEBUG ?= 0
+ifeq ($(DEBUG),1)
+	CFLAGS += -g -DDEBUG
+endif
+NAME	= ircserv
 
-CC = c++
-FLAGS = -Wall -Wextra -Werror -std=c++98
-NAME = ircserv
-SRCS = main.cpp Server.cpp
-OBJS = $(SRCS:.cpp=.o)
-HEADERS = Server.hpp
+SRC_DIR = srcs
+OBJ_DIR = objs
+
+SRCS = \
+	$(SRC_DIR)/main.cpp \
+	$(SRC_DIR)/server/Server.cpp \
+	$(SRC_DIR)/socket/Socket.cpp \
+	$(SRC_DIR)/client/Client.cpp \
+	$(SRC_DIR)/client/ClientConnection.cpp \
+	$(SRC_DIR)/client/ClientIdentity.cpp \
+	$(SRC_DIR)/client/ClientManager.cpp \
+	$(SRC_DIR)/client/ClientState.cpp \
+	$(SRC_DIR)/Message.cpp \
+	$(SRC_DIR)/Executor.cpp
+
+OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+
+INCLUDES = -I$(SRC_DIR) \
+	-I$(SRC_DIR)/server \
+	-I$(SRC_DIR)/socket \
+	-I$(SRC_DIR)/client
 
 all: $(NAME)
-%.o:%.cpp $(HEADERS)
-	@$(CC) $(FLAGS) -c $< -o $@
 
 $(NAME): $(OBJS)
-	@$(CC) $(FLAGS) $(OBJS) -o $(NAME)
-	@clear
+	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 	@echo "IRC SERVER compiled."
 
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
 clean:
-	@rm -f $(OBJS)
-	@clear
+	@rm -rf $(OBJ_DIR)
 	@echo "Objects cleaned."
 
 fclean: clean
 	@rm -f $(NAME)
-	@clear
-	@echo "All cleaned"
-
+	@echo "All cleaned."
 
 re: fclean all
 
-PHONY: re fclean clean all
+.PHONY: all clean fclean re
 
