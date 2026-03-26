@@ -16,6 +16,24 @@ Client*	ClientManager::getClient(int fd)
 	return NULL;
 }
 
+bool	ClientManager::comp(const std::string& s1, const std::string& s2) const{
+	if (s1.size() != s2.size()) return false;
+	for (size_t i = 0; i < s1.size(); i++){
+		if (std::tolower(s1[i]) != std::tolower(s2[i]))
+			return false;
+	}
+	return true;
+}
+
+Client*	ClientManager::getByNick(const std::string& nick){
+	std::map<int, Client>::iterator	it;
+	for (it = _clients.begin(); it != _clients.end(); ++it){
+		if (comp((it->second).getNickName(), nick))
+			return &it->second;
+	}
+	return NULL;
+}
+
 std::map<int, Client>& ClientManager::getAllClient(){
 	return _clients;
 }
@@ -41,7 +59,7 @@ void	ClientManager::clear(){
 bool	ClientManager::isNickUnique(const std::string& nick) const{
 	std::map<int, Client>::const_iterator it;
 	for (it = _clients.begin(); it != _clients.end(); it++){
-		if (it->second.getNickName() == nick)
+		if (comp((it->second).getNickName(), nick))
 			return false;
 	}
 	return true;

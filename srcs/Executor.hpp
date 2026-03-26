@@ -16,15 +16,17 @@ class Executor
 		std::map<std::string, _handler> _command;
 
 		void	welcome(Server&, Client&);
+		void	cap(Server&, Client&, const Message&);
 		void	pass(Server&, Client&, const Message&);
 		void	nick(Server&, Client&, const Message&);
 		void	user(Server&, Client&, const Message&);
+		void	privmsg(Server&, Client&, const Message&);
 		bool	isValidName(const std::string&);
 	public:
 		Executor();
 
 		void	execute(Server&, Client&, const Message&);
-		void	unknown();
+		void	unknown(Server&, Client&, const Message&);
 };
 
 #endif

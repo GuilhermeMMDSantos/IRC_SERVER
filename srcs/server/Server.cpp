@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 Server::Server(const char *port, const std::string& password)
-:_socket(port), _password(password), _isRunning(false)
+:_socket(port), _password(password), _isRunning(false), _name("ft_irc.42.fr")
 {
 	_tmpfd = open("/dev/null", O_RDONLY);
 	if (_tmpfd < 0){
@@ -185,4 +185,8 @@ void Server::sendMessage(Client& client, const std::string& msg){
 
 bool	Server::isNickAvailable(const std::string& nick) const{
 	return _clientMgr.isNickUnique(nick);
+}
+
+Client*	Server::getClientByNick(const std::string& nick){
+	return _clientMgr.getByNick(nick);
 }

@@ -27,7 +27,7 @@ class Server{
 		void handleClient(int fd);
 		void processMessage(int fd, const std::string& message);
 	public:
-
+		const std::string	_name;
 		Server(const char* port, const std::string& password);
 		~Server();
 
@@ -39,5 +39,6 @@ class Server{
 		bool		isNickAvailable(const std::string&) const;
 
 		void	sendMessage(Client&, const std::string&);
+		Client*	getClientByNick(const std::string& nick);
 };
 #endif
