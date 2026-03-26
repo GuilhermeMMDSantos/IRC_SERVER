@@ -29,12 +29,11 @@ void	Executor::privmsg(Server& server, Client& client, const Message& msg){
 	} else {
 		Client* targetClient = server.getClientByNick(target);
 		if (!targetClient){
-			
+
 			server.sendMessage(client, ":"+ server._name + " 401 " + target + " :No such nick");
 			return;
 		}
-		std::cout << targetClient->getNickName() << std::endl;
-		std::string message = ":" + target + "!" + client.getUserName() + "@" + client.getIP() + " PRIVMSG " + target + " :" + text;
+		std::string message = ":" + client.getNickName() + "!" + client.getUserName() + "@" + client.getIP() + " PRIVMSG " + target + " :" + text;
 		server.sendMessage(*targetClient, message);
 	}
 }
