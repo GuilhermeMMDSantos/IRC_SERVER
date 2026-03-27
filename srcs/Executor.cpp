@@ -98,6 +98,13 @@ void	Executor::nick(Server& server, Client& client, const Message& msg){
 	client.nickCreated();
 }
 
+
+void Executor::join(Server& server, Client& client, const Message& msg){
+
+}
+
+
+
 void	Executor::user(Server& server, Client& client, const Message& msg){
 	if (client.isRegisted() || !client.hasNick()){
 		server.sendMessage(client, ":"+ server._name + " 462 * :You have not registered (need NICK)");

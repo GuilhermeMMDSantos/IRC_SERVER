@@ -1,7 +1,7 @@
 #include "Channel.hpp"
 
 Channel::Channel(const std::string& name)
-: _name(name), _topic("")
+: _name(name), _topic(""), _password("")
 {}
 
 const std::string& Channel::getName() const{
@@ -10,6 +10,14 @@ const std::string& Channel::getName() const{
 
 const std::string& Channel::getTopic() const{
     return _topic;
+}
+
+bool Channel::hasPassword() const{
+    return !_password.empty();
+}
+
+bool Channel::checkPassword(const std::string& pwd) const{
+    return _password == pwd;
 }
 
 
@@ -43,4 +51,18 @@ std::map<int, Client*>& Channel::getMembers(){
     return _members;
 }
 
-//std::string Channel::getMemberList
+std::string     Channel::getMemberList() const{
+    std::string list;
+
+    for (std::map<int, Client*>::const_iterator it = _members.begin(); it != _members.end(); ++it){
+        if (!list.empty())
+            list += " ";
+
+        std::map<int, bool>::const_iterator opIt = _operators.find(it->first);
+        if (opIt != _operators.end() && opIt->second)
+            list += "@";
+
+        list += it->second->getNickName();
+    }
+    return list;
+}

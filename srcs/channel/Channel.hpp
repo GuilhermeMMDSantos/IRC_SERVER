@@ -12,6 +12,7 @@ class Channel{
     private:
         std::string             _name;
         std::string             _topic;
+		std::string				_password;
         std::map<int, Client*>  _members;
         std::map<int, bool>     _operators;
 
@@ -19,9 +20,12 @@ class Channel{
             Channel(const std::string& name);
             const std::string&      getName() const;
             const std::string&      getTopic() const;
+			bool					hasPassword() const;
+			bool					checkPassword( const std::string& pwd) const;
 
 
             void    setTopic(const std::string& topic);
+			void	setPassword(const std::string& pwd);
 
             void    addMember( Client* client, bool isOperator = false);
             void    removeMember(int fd);
@@ -29,9 +33,7 @@ class Channel{
             bool    isOperator(int fd) const;
 
             std::map<int, Client*>& getMembers();
-            void brodcast(Server&, Client&, const std::string&);
-          //  std::string             getMemberList() const;
-
+			std::string              getMemberList() const;
 };
 
 #endif
