@@ -15,15 +15,18 @@ class Executor
 		typedef void (Executor::*_handler)(Server&, Client&, const Message&);
 		std::map<std::string, _handler> _command;
 
+		void	welcome(Server&, Client&);
+		void	cap(Server&, Client&, const Message&);
 		void	pass(Server&, Client&, const Message&);
 		void	nick(Server&, Client&, const Message&);
 		void	user(Server&, Client&, const Message&);
-		bool	isValidNick(const std::string&);
+		void	privmsg(Server&, Client&, const Message&);
+		bool	isValidName(const std::string&);
 	public:
 		Executor();
 
 		void	execute(Server&, Client&, const Message&);
-		void	unknown();
+		void	unknown(Server&, Client&, const Message&);
 };
 
 #endif

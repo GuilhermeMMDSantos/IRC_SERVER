@@ -67,7 +67,7 @@ ClientConnection Socket::acceptClient() const{
 	setNonBlocking(fd);
 
 	char ip[INET6_ADDRSTRLEN];
-	short port = -1;
+	uint16_t port = 0;
 	if (clientAddr.ss_family == AF_INET) {
 		sockaddr_in* s = (sockaddr_in*)&clientAddr;
 		inet_ntop(AF_INET, &s->sin_addr, ip, sizeof(ip));
