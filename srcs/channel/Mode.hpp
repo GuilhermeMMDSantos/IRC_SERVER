@@ -2,6 +2,7 @@
 #define __MODES_HPP__
 
 #include <string>
+#include <sstream>
 #include <map>
 #include "Client.hpp"
 #include "Message.hpp"
@@ -26,6 +27,8 @@ class Modes{
 		void	updateOmode(bool);
 		void	updateLimit(int);
 
+		std::string	getKey() const;
+		std::string	getLimittoString() const;
 		bool	getTmode() const;
 		bool	getImode() const;
 		bool	getKmode() const;

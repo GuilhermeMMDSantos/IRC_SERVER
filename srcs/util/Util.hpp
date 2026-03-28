@@ -4,11 +4,11 @@
 #include <map>
 #include <string>
 #include <algorithm>
+#include <sstream>
 #include "Client.hpp"
 
 
 class Server;
-
 
 class Util
 {
@@ -22,8 +22,23 @@ class Util
 			return true;
 		}
 
+		static bool	isValidNumber(const std::string& str) {
+			for (size_t i = 0; i < str.length(); i++) {
+				if (!isdigit(str[i]))
+				return false;
+			}
+			return !str.empty();
+		}
+
+		static int	toInt(std::string& n){
+			int res;
+			std::istringstream iss(n);
+			iss >> res;
+			return res;
+		}
+
 		template <typename T>
-		static typename T::mapped_type* getClientByNick(T& o, const std::string& nick) {
+		static typename T::mapped_type* getObjectByString(T& o, const std::string& nick) {
 			typename T::iterator it;
 
 			for (it = o.begin(); it != o.end(); ++it) {

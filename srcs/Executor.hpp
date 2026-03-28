@@ -7,6 +7,7 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "Mode.hpp"
+#include "util/Util.hpp"
 
 class Server;
 
@@ -17,6 +18,7 @@ class Executor
 		std::map<std::string, _handler> _command;
 
 		void	welcome(Server&, Client&);
+		bool	verify(Server&, Client&);
 		void	cap(Server&, Client&, const Message&);
 		void	pass(Server&, Client&, const Message&);
 		void	nick(Server&, Client&, const Message&);

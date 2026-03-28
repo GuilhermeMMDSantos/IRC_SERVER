@@ -183,7 +183,7 @@ void Server::sendMessage(Client& client, const std::string& msg){
 	}
 }
 
-bool	Server::isNickAvailable(const std::string& nick) const{
+bool	Server::isNickAvailable(const std::string& nick) {
 	return _clientMgr.isNickUnique(nick);
 }
 
@@ -201,6 +201,6 @@ std::string	Server::activesModes(const std::string& channel){
 	std::string ch = "";
 	Channel *target = getChannelByName(channel);
 	if (!target) return ch;
-	ch = (*target).getActivesModes(ch);
+	ch = (*target).getActivesModes();
 	return ch;
 }

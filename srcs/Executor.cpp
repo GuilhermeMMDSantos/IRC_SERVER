@@ -12,6 +12,7 @@ Executor::Executor(){
 }
 
 void	Executor::mode(Server& server, Client& client, const Message& msg){
+	if (!verify(server, client)) return ;
 	std::vector<std::string> params = msg.getParams();
 	std::string canal = params[0].empty() ? "": params[0];
 	if (params.size() < 2){
@@ -36,8 +37,9 @@ void	Executor::mode(Server& server, Client& client, const Message& msg){
 	}
 	std::string modes = params[1];
 	std::string lastparam = params[2].empty() ? "" : params[2];
-	
+
 	bool adding = true;
+	bool nickFounded = false;
 	for (size_t i = 0; i < modes.size(); ++i){
 		char c = modes[i];
 		if (c == '+'){
@@ -50,16 +52,18 @@ void	Executor::mode(Server& server, Client& client, const Message& msg){
 		}
 		if (!channel->isOperator(client.getFd())){
 			server.sendMessage(client, ":"+ server._name + " 403 " + client.getNickName() + " " + \
-									canal + " :You're not channel operator");
+								canal + " :You're not channel operator");
 			break ;
 		}
 		switch (c)
 		{
 		case 'i':
 			channel->changeImode(adding);
+			// Broadcast message
 			break;
 		case 't':
 			channel->changeTmode(adding);
+			// Broadcast message
 			break;
 		case 'k':
 			if (lastparam.empty()){
@@ -67,21 +71,37 @@ void	Executor::mode(Server& server, Client& client, const Message& msg){
 									" MODE :Not enough parameters");
 			}
 			channel->changeKmode(adding, lastparam);
+			// BroadCast Message;
 			break;
 		case 'o':
-			if (!adding) channel.re
+			if (!adding) {nickFounded = channel->removeOperator(lastparam);}
+			else {nickFounded = channel->addOperator(lastparam);}
+			if (!nickFounded){
+				server.sendMessage(client, ":"+ server._name + " 401 " + client.getNickName() + \
+										" " + lastparam + " :Not such nick/channel");
+				break;
+			}
+			// BroadCast Message
 			break;
 		case 'l':
-			/* code */
+			if (lastparam.empty() || Util::isValidNumber(lastparam)){
+				server.sendMessage(client, ":"+ server._name + " 461 " + client.getNickName() + \
+									" MODE :Not enough parameters");
+			}
+			channel->changeLmode(Util::toInt(lastparam));
+			// Broadcast message
 			break;
 
 		default:
+			server.sendMessage(client, ":"+ server._name + " 472 " + client.getNickName() + \
+									" " + c + " MODE :Is unknown mode char to me");
 			break;
 		}
 	}
 }
 
 void	Executor::privmsg(Server& server, Client& client, const Message& msg){
+	if (!verify(server, client)) return ;
 	std::vector<std::string> params = msg.getParams();
 	if (params.empty()){
 		server.sendMessage(client, ":"+ server._name + " 411 :No recipient given (PRIVMSG)");
@@ -144,9 +164,8 @@ bool	Executor::isValidName(const std::string& nick){
 }
 
 void	Executor::nick(Server& server, Client& client, const Message& msg){
-	if (client.isRegisted() || !client.hasPassword()){
+	if (!client.hasPassword()){
 		server.sendMessage(client, ":"+ server._name + " 462 * :You have not registered (need PASS)");
-		return;
 	}
 	if (msg.getParams().empty()){
 		server.sendMessage(client, ":"+ server._name + " 431 * NICK :No nickname given");
@@ -167,10 +186,16 @@ void	Executor::nick(Server& server, Client& client, const Message& msg){
 	}
 	client.updateNick(m);
 	client.nickCreated();
+	if (client.isRegisted()){
+		server.sendMessage(client, ":"+ server._name + " :You're now known as " + m);
+	}
 }
 
 void	Executor::user(Server& server, Client& client, const Message& msg){
-	if (client.isRegisted() || !client.hasNick()){
+	if (client.isRegisted()){
+		server.sendMessage(client, ":"+ server._name + " 462 * :Already registed)");
+	}
+	if (!client.hasNick()){
 		server.sendMessage(client, ":"+ server._name + " 462 * :You have not registered (need NICK)");
 		return;
 	}
@@ -222,10 +247,6 @@ void	Executor::welcome(Server& server, Client& client){
 
 void	Executor::execute(Server& server, Client& client, const Message& msg){
 	std::map<std::string, _handler>::iterator it;
-	if (!client.isRegisted()){
-		server.sendMessage(client, ":"+ server._name + " 462 " + client.getNickName() +" :You have not registered (need PASS)");
-		return;
-	}
 	std::string cmdstr = msg.getCommand();
 
 	std::transform(cmdstr.begin(), cmdstr.end(), cmdstr.begin(), ::toupper);
@@ -241,5 +262,13 @@ void	Executor::unknown(Server& server, Client& client, const Message& msg){
 
 	std::string response =":" + server._name + " 421 " + nick + " " + msg.getCommand() + " :Unknown command";
 	server.sendMessage(client, response);
+}
+
+bool	Executor::verify(Server& server, Client& client){
+	if (!client.isRegisted() || !client.hasPassword()){
+		server.sendMessage(client, ":"+ server._name + " 462 * :You have not registered (need PASS)");
+		return false;
+	}
+	return true;
 }
 

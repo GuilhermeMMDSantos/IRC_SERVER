@@ -18,12 +18,16 @@ SRCS = \
 	$(SRC_DIR)/client/ClientIdentity.cpp \
 	$(SRC_DIR)/client/ClientManager.cpp \
 	$(SRC_DIR)/client/ClientState.cpp \
+	$(SRC_DIR)/channel/Mode.cpp \
+	$(SRC_DIR)/channel/Channel.cpp \
 	$(SRC_DIR)/Message.cpp \
 	$(SRC_DIR)/Executor.cpp
 
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 INCLUDES = -I$(SRC_DIR) \
+	-I$(SRC_DIR)/util \
+	-I$(SRC_DIR)/channel \
 	-I$(SRC_DIR)/server \
 	-I$(SRC_DIR)/socket \
 	-I$(SRC_DIR)/client

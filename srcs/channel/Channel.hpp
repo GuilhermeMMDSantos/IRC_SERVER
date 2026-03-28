@@ -17,6 +17,7 @@ class Channel{
 		Modes					_modes;
 		std::map<int, Client>	_members;
 		std::map<int, bool>		_operators;
+		int						_userCount;
 
 		public:
 			Channel(const std::string& name);
@@ -26,23 +27,24 @@ class Channel{
 
 			void	setTopic(const std::string& topic);
 
-			void	addMember( Client* client, bool isOperator = false);
+			void	addMember( Client& client, bool isOperator = false);
 			void	removeMember(int fd);
-			void	removeOperator(const std::string&);
+			bool	removeOperator(const std::string&);
+			bool	addOperator(const std::string&);
 			bool	isMember(int fd) const;
 			bool	isOperator(int fd) const;
 
-			std::map<int, Client*>&	getMembers();
+			std::map<int, Client>&	getMembers();
 
 			void	changeImode(bool);
 			void	changeTmode(bool);
 			void	changeKmode(bool, const std::string&);
 			void	changeOmode(bool);
-			void	changeLmode(bool);
+			void	changeLmode(int);
 
 			void	brodcast(Server&, Client&, const std::string&);
 
-			std::string	getActivesModes(const std::string& channel);
+			std::string	getActivesModes();
 		  //  std::string             getMemberList() const;
 
 };

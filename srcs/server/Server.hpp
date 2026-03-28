@@ -40,7 +40,7 @@ class Server{
 		std::string	getPassword() const;
 		std::string	activesModes(const std::string&);
 		Channel*	getChannelByName(const std::string&);
-		bool		isNickAvailable(const std::string&) const;
+		bool		isNickAvailable(const std::string&);
 
 		void	sendMessage(Client&, const std::string&);
 		Client*	getClientByNick(const std::string& nick);

@@ -44,3 +44,12 @@ bool	Modes::getOmode() const{
 int	Modes::getLimit() const{
 	return _limit;
 }
+
+std::string	Modes::getKey() const{
+	return _key;
+}
+std::string	Modes::getLimittoString() const{
+	std::ostringstream oss;
+	oss << _limit;
+	return oss.str();
+}
