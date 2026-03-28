@@ -151,6 +151,10 @@ void	Executor::welcome(Server& server, Client& client){
 
 void	Executor::execute(Server& server, Client& client, const Message& msg){
 	std::map<std::string, _handler>::iterator it;
+	if (!client.isRegisted()){
+		server.sendMessage(client, ":"+ server._name + " 462 " + client.getNickName() +" :You have not registered (need PASS)");
+		return;
+	}
 	std::string cmdstr = msg.getCommand();
 
 	std::transform(cmdstr.begin(), cmdstr.end(), cmdstr.begin(), ::toupper);
