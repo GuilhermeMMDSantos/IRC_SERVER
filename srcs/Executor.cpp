@@ -5,6 +5,7 @@ Executor::Executor(){
 	_command.clear();
 	_command.insert(std::make_pair("PASS", &Executor::pass));
 	_command.insert(std::make_pair("NICK", &Executor::nick));
+	_command.insert(std::make_pair("JOIN", &Executor::join));
 	_command.insert(std::make_pair("USER", &Executor::user));
 	_command.insert(std::make_pair("CAP", &Executor::cap));
 	_command.insert(std::make_pair("PRIVMSG", &Executor::privmsg));
@@ -101,6 +102,51 @@ void	Executor::nick(Server& server, Client& client, const Message& msg){
 
 void Executor::join(Server& server, Client& client, const Message& msg){
 
+	if (!client.isRegisted())
+		return server.sendMessage(client, ":"+ server._name + " 451 * :You have not registered");
+
+	const std::vector<std::string>& params = msg.getParams();
+	if (params.empty())
+		return server.sendMessage(client, ":"+ server._name + " 461 JOIN :Not enough parameters");
+
+	const std::string& chanName = params[0];
+	std::string password = (params.size() > 1) ? params[1] : "";
+
+	Channel* channel = server.getChannelManager().getOrCreate(chanName);
+
+	if (!channel)
+		return server.sendMessage(client, ":"+ server._name + " 403 " + client.getNickName() + " " + chanName + " :No such channel");
+
+	if (channel->isMember(client.getFd()))
+		return ;
+
+	if ( channel->hasPassword() && !channel->checkPassword(password))
+		return server.sendMessage(client,  ":"+ server._name + " 475 " + client.getNickName() + " " + chanName + " :Bad channel key");
+
+	bool isFirstMember = channel->getMembers().empty();
+	channel->addMember(&client, isFirstMember);
+
+	std::string joinMsg = ":" + client.getNickName() + "!~"
+						+ client.getUserName() + "@" + client.getIP()
+						+ " JOIN " + chanName;
+
+	std::map<int, Client*>& members = channel->getMembers();
+
+	for (std::map<int, Client*>::iterator it = members.begin(); it != members.end(); ++it)
+		server.sendMessage(*it->second, joinMsg);
+
+	if (!channel->getTopic().empty())
+		server.sendMessage(client, ":" + server._name +" 332 " + client.getNickName()
+		+ " " + chanName + " :" + channel->getTopic());
+	else
+		server.sendMessage(client, ":" + server._name +" 331 " + client.getNickName()
+		+ " " + chanName + " :No topic is set");
+
+	server.sendMessage(client, ":" + server._name + " 353 " + client.getNickName()
+		+ " = " + chanName + " :" + channel->getMemberList());
+
+	server.sendMessage(client, ":" + server._name + " 366 " + client.getNickName()
+		+ " " + chanName + " :End of /NAMES list");
 }
 
 

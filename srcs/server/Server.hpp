@@ -9,6 +9,7 @@
 #include <poll.h>
 #include "Socket.hpp"
 #include "ClientManager.hpp"
+#include "ChannelManager.hpp"
 #include "Message.hpp"
 #include "Executor.hpp"
 
@@ -16,6 +17,7 @@ class Server{
 	private:
 		Socket				_socket;
 		ClientManager		_clientMgr;
+		ChannelManager		_channelMgr;
 		Executor			_executor;
 		const std::string	_password;
 		bool				_isRunning;
@@ -40,5 +42,7 @@ class Server{
 
 		void	sendMessage(Client&, const std::string&);
 		Client*	getClientByNick(const std::string& nick);
+		ChannelManager& getChannelManager();
+
 };
 #endif

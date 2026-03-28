@@ -6,6 +6,8 @@
 #include <algorithm>
 #include "Client.hpp"
 #include "Message.hpp"
+#include "Channel.hpp"
+#include "ChannelManager.hpp"
 
 class Server;
 

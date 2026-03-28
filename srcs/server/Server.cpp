@@ -190,3 +190,7 @@ bool	Server::isNickAvailable(const std::string& nick) const{
 Client*	Server::getClientByNick(const std::string& nick){
 	return _clientMgr.getByNick(nick);
 }
+
+ChannelManager& Server::getChannelManager(){
+	return _channelMgr;
+}
