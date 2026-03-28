@@ -8,6 +8,77 @@ Executor::Executor(){
 	_command.insert(std::make_pair("USER", &Executor::user));
 	_command.insert(std::make_pair("CAP", &Executor::cap));
 	_command.insert(std::make_pair("PRIVMSG", &Executor::privmsg));
+	_command.insert(std::make_pair("MODE", &Executor::mode));
+}
+
+void	Executor::mode(Server& server, Client& client, const Message& msg){
+	std::vector<std::string> params = msg.getParams();
+	std::string canal = params[0].empty() ? "": params[0];
+	if (params.size() < 2){
+		std::string res = "";
+		if (canal.empty())
+			res = ":"+ server._name + " 324 " + client.getNickName();
+		else{
+			res = ":"+ server._name + " 324 " + client.getNickName() + " " + canal + " " + \
+					server.activesModes(canal);
+		}
+		server.sendMessage(client, res);
+	}
+	if (canal[0] != '#'){
+		server.sendMessage(client, ":"+ server._name + " 221 " + client.getNickName());
+		return;
+	}
+	Channel* channel = server.getChannelByName(canal);
+	if (!channel){
+		server.sendMessage(client, ":"+ server._name + " 403 " + client.getNickName() + " " + \
+							canal + " :No such channel");
+		return ;
+	}
+	std::string modes = params[1];
+	std::string lastparam = params[2].empty() ? "" : params[2];
+	
+	bool adding = true;
+	for (size_t i = 0; i < modes.size(); ++i){
+		char c = modes[i];
+		if (c == '+'){
+			adding = true;
+			continue;
+		}
+		if (c == '-'){
+			adding = false;
+			continue;
+		}
+		if (!channel->isOperator(client.getFd())){
+			server.sendMessage(client, ":"+ server._name + " 403 " + client.getNickName() + " " + \
+									canal + " :You're not channel operator");
+			break ;
+		}
+		switch (c)
+		{
+		case 'i':
+			channel->changeImode(adding);
+			break;
+		case 't':
+			channel->changeTmode(adding);
+			break;
+		case 'k':
+			if (lastparam.empty()){
+				server.sendMessage(client, ":"+ server._name + " 461 " + client.getNickName() + \
+									" MODE :Not enough parameters");
+			}
+			channel->changeKmode(adding, lastparam);
+			break;
+		case 'o':
+			if (!adding) channel.re
+			break;
+		case 'l':
+			/* code */
+			break;
+
+		default:
+			break;
+		}
+	}
 }
 
 void	Executor::privmsg(Server& server, Client& client, const Message& msg){

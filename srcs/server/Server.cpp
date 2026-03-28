@@ -190,3 +190,17 @@ bool	Server::isNickAvailable(const std::string& nick) const{
 Client*	Server::getClientByNick(const std::string& nick){
 	return _clientMgr.getByNick(nick);
 }
+
+Channel*	Server::getChannelByName(const std::string& name){
+	std::map<std::string, Channel>::iterator	it = _channels.find(name);
+	if (it != _channels.end()) return &it->second;
+	return NULL;
+}
+
+std::string	Server::activesModes(const std::string& channel){
+	std::string ch = "";
+	Channel *target = getChannelByName(channel);
+	if (!target) return ch;
+	ch = (*target).getActivesModes(ch);
+	return ch;
+}

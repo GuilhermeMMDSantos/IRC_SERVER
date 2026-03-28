@@ -1,5 +1,5 @@
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef __SERVER_H__
+#define __SERVER_H__
 
 #define MAX_CONNECTIONS 128
 #define BUFFER_SIZE 4096
@@ -11,16 +11,18 @@
 #include "ClientManager.hpp"
 #include "Message.hpp"
 #include "Executor.hpp"
+#include "Channel.hpp"
 
 class Server{
 	private:
-		Socket				_socket;
-		ClientManager		_clientMgr;
-		Executor			_executor;
-		const std::string	_password;
-		bool				_isRunning;
-		std::vector<pollfd>	fds;
-		int					_tmpfd;
+		Socket								_socket;
+		ClientManager						_clientMgr;
+		Executor							_executor;
+		const std::string					_password;
+		bool								_isRunning;
+		std::vector<pollfd>					fds;
+		int									_tmpfd;
+		std::map<std::string, Channel>	_channels;
 
 
 		void acceptClient();
@@ -36,6 +38,8 @@ class Server{
 		void	disconnectClient(int fd);
 
 		std::string	getPassword() const;
+		std::string	activesModes(const std::string&);
+		Channel*	getChannelByName(const std::string&);
 		bool		isNickAvailable(const std::string&) const;
 
 		void	sendMessage(Client&, const std::string&);

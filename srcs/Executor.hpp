@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "Client.hpp"
 #include "Message.hpp"
+#include "Mode.hpp"
 
 class Server;
 
@@ -21,6 +22,7 @@ class Executor
 		void	nick(Server&, Client&, const Message&);
 		void	user(Server&, Client&, const Message&);
 		void	privmsg(Server&, Client&, const Message&);
+		void	mode(Server&, Client&, const Message&);
 		bool	isValidName(const std::string&);
 	public:
 		Executor();

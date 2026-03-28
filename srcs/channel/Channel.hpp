@@ -1,0 +1,50 @@
+#ifndef __CHANNEL_HPP__
+#define __CHANNEL_HPP__
+
+#include <string>
+#include <map>
+#include "Client.hpp"
+#include "Mode.hpp"
+#include "util/Util.hpp"
+
+class Server;
+
+class Channel{
+
+	private:
+		std::string				_name;
+		std::string				_topic;
+		Modes					_modes;
+		std::map<int, Client>	_members;
+		std::map<int, bool>		_operators;
+
+		public:
+			Channel(const std::string& name);
+			const std::string&		getName() const;
+			const std::string&		getTopic() const;
+
+
+			void	setTopic(const std::string& topic);
+
+			void	addMember( Client* client, bool isOperator = false);
+			void	removeMember(int fd);
+			void	removeOperator(const std::string&);
+			bool	isMember(int fd) const;
+			bool	isOperator(int fd) const;
+
+			std::map<int, Client*>&	getMembers();
+
+			void	changeImode(bool);
+			void	changeTmode(bool);
+			void	changeKmode(bool, const std::string&);
+			void	changeOmode(bool);
+			void	changeLmode(bool);
+
+			void	brodcast(Server&, Client&, const std::string&);
+
+			std::string	getActivesModes(const std::string& channel);
+		  //  std::string             getMemberList() const;
+
+};
+
+#endif
