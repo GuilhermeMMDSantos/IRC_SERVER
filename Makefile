@@ -18,17 +18,35 @@ SRCS = \
 	$(SRC_DIR)/client/ClientIdentity.cpp \
 	$(SRC_DIR)/client/ClientManager.cpp \
 	$(SRC_DIR)/client/ClientState.cpp \
-<<<<<<< HEAD
 	$(SRC_DIR)/channel/Mode.cpp \
 	$(SRC_DIR)/channel/Channel.cpp \
-=======
-	$(SRC_DIR)/channel/Channel.cpp \
 	$(SRC_DIR)/channel/ChannelManager.cpp \
->>>>>>> feature/create_channel
 	$(SRC_DIR)/Message.cpp \
-	$(SRC_DIR)/Executor.cpp
+	$(SRC_DIR)/Executor.cpp \
+	$(SRC_DIR)/commands/cap.cpp \
+	$(SRC_DIR)/commands/join.cpp \
+	$(SRC_DIR)/commands/mode.cpp \
+	$(SRC_DIR)/commands/nick.cpp \
+	$(SRC_DIR)/commands/pass.cpp \
+	$(SRC_DIR)/commands/privmsg.cpp \
+	$(SRC_DIR)/commands/user.cpp
 
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+
+HDRS = \
+	$(SRC_DIR)/Executor.hpp \
+	$(SRC_DIR)/Message.hpp \
+	$(SRC_DIR)/channel/Channel.hpp \
+	$(SRC_DIR)/channel/ChannelManager.hpp \
+	$(SRC_DIR)/channel/Mode.hpp \
+	$(SRC_DIR)/client/Client.hpp \
+	$(SRC_DIR)/client/ClientConnection.hpp \
+	$(SRC_DIR)/client/ClientIdentity.hpp \
+	$(SRC_DIR)/client/ClientManager.hpp \
+	$(SRC_DIR)/client/ClientState.hpp \
+	$(SRC_DIR)/server/Server.hpp \
+	$(SRC_DIR)/socket/Socket.hpp \
+	$(SRC_DIR)/util/Util.hpp
 
 INCLUDES = -I$(SRC_DIR) \
 	-I$(SRC_DIR)/util \
@@ -44,7 +62,7 @@ $(NAME): $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 	@echo "IRC SERVER compiled."
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(HDRS)
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 

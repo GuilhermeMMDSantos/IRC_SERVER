@@ -192,9 +192,7 @@ Client*	Server::getClientByNick(const std::string& nick){
 }
 
 Channel*	Server::getChannelByName(const std::string& name){
-	std::map<std::string, Channel>::iterator	it = _channels.find(name);
-	if (it != _channels.end()) return &it->second;
-	return NULL;
+ 	return _channelMgr.getChannel(name);
 }
 
 std::string	Server::activesModes(const std::string& channel){
@@ -204,6 +202,6 @@ std::string	Server::activesModes(const std::string& channel){
 	ch = (*target).getActivesModes();
 	return ch;
 }
-Channel* Server::getChannel(const std::string& name){
+Channel* Server::getOrCreateChannel(const std::string& name){
 	return _channelMgr.getOrCreate(name);
 }

@@ -23,8 +23,7 @@ class Server{
 		bool								_isRunning;
 		std::vector<pollfd>					fds;
 		int									_tmpfd;
-		std::map<std::string, Channel>	_channels;
-		ChannelManager		_channelMgr;
+		ChannelManager						_channelMgr;
 
 
 		void acceptClient();
@@ -46,7 +45,7 @@ class Server{
 
 		void	sendMessage(Client&, const std::string&);
 		Client*	getClientByNick(const std::string& nick);
-		Channel* getChannel(const std::string& name);
+		Channel* getOrCreateChannel(const std::string& name);
 
 };
 #endif

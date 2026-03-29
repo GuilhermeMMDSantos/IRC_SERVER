@@ -1,4 +1,5 @@
 #include "Channel.hpp"
+#include "Server.hpp"
 
 Channel::Channel(const std::string& name)
 : _name(name), _topic(""), _userCount(0){}
@@ -125,4 +126,12 @@ std::string		Channel::getMemberList() const{
 		list += it->second.getNickName();
 	}
 	return list;
+}
+
+void	Channel::broadcast(Server& server, Client& client, const std::string& msg, bool sendSelf){
+	std::map<int, Client>::iterator it = _members.begin();
+	for (; it != _members.end(); it++){
+		if (!sendSelf && it->first == client.getFd()) continue;
+		server.sendMessage((it->second), msg);
+	}
 }

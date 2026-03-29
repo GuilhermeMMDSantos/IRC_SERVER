@@ -42,7 +42,7 @@ class Channel{
 			void	changeOmode(bool);
 			void	changeLmode(int);
 
-			void	broadcast(Server&, Client&, const std::string&);
+			void	broadcast(Server&, Client&, const std::string&, bool sendSelf);
 
 			std::string	getActivesModes();
 
