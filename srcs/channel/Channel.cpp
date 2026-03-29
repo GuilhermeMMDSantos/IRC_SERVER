@@ -147,3 +147,18 @@ Client*	Channel::getClientByNick(const std::string& nick){
 bool	Channel::isEmpty() const{
 	return _members.empty();
 }
+
+bool	Channel::hasImode() const{
+	return _modes.getImode();
+}
+
+void	Channel::addToInviteList(const std::string const& nick){
+	_inviteList.push_back(nick);
+}
+
+bool	Channel::wasInvited(const std::string& nick) const{
+	for(size_t i = 0; i < _inviteList.size(); i++){
+		if (_inviteList[i] == nick) return true;
+	}
+	return false;
+}

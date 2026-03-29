@@ -10,8 +10,9 @@ Executor::Executor(){
 	_command.insert(std::make_pair("CAP", &Executor::cap));
 	_command.insert(std::make_pair("PRIVMSG", &Executor::privmsg));
 	_command.insert(std::make_pair("MODE", &Executor::mode));
-	_command.insert(std::make_pair("PING", &Executor::mode));
-	
+	_command.insert(std::make_pair("PING", &Executor::ping));
+	_command.insert(std::make_pair("KICK", &Executor::kick));
+	_command.insert(std::make_pair("INVITE", &Executor::invite));
 }
 
 bool	Executor::isValidName(const std::string& nick){

@@ -14,7 +14,6 @@ void Executor::topic(Server& server, Client& client, const Message& msg) {
 	if (!channel) {
 		server.sendMessage(client, ":" + server._name + " 403 " + client.getNickName() + " " + name + " :No such channel");
 		return;
-		return;
 	}
 	if (params.size() == 1) {
 		std::string curTopic = channel->getTopic();

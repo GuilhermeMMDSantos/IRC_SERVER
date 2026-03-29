@@ -17,10 +17,16 @@ void Executor::join(Server& server, Client& client, const Message& msg){
 	if (!channel)
 		return server.sendMessage(client, ":"+ server._name + " 403 " + client.getNickName() + " " + chanName + " :No such channel");
 
+	if (channel->hasImode() && !channel->wasInvited(client.getNickName())){
+		server.sendMessage(client,  ":"+ server._name + " 473 " + client.getNickName() + " " + chanName + " :Invite only channel");
+		return ;
+	}
 	if (channel->isMember(client.getFd())) return ;
 
-	if ( channel->hasPassword() && !channel->checkPassword(password))
-		return server.sendMessage(client,  ":"+ server._name + " 475 " + client.getNickName() + " " + chanName + " :Bad channel key");
+	if ( channel->hasPassword() && !channel->checkPassword(password)){
+		server.sendMessage(client,  ":"+ server._name + " 475 " + client.getNickName() + " " + chanName + " :Bad channel key");
+		return ;
+	}
 
 	channel->addMember(client, channel->isFirstMember());
 

@@ -31,6 +31,7 @@ class Executor
 		void	ping(Server&, Client&, const Message&);
 		void	topic(Server&, Client&, const Message&);
 		void	kick(Server&, Client&, const Message&);
+		void	invite(Server&, Client&, const Message&);
 		bool	isValidName(const std::string&);
 	public:
 		Executor();
