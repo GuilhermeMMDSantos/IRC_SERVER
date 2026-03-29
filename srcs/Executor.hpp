@@ -28,6 +28,9 @@ class Executor
 		void	user(Server&, Client&, const Message&);
 		void	privmsg(Server&, Client&, const Message&);
 		void	mode(Server&, Client&, const Message&);
+		void	ping(Server&, Client&, const Message&);
+		void	topic(Server&, Client&, const Message&);
+		void	kick(Server&, Client&, const Message&);
 		bool	isValidName(const std::string&);
 	public:
 		Executor();

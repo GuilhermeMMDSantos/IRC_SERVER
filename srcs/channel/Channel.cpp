@@ -79,6 +79,10 @@ void	Channel::changeLmode(int b){
 	_modes.updateLimit(b);
 }
 
+bool	Channel::hasTmode() const{
+	return _modes.getTmode();
+}
+
 std::string	Channel::getActivesModes(){
 	std::string act = "";
 	std::vector<std::string> params;
@@ -100,7 +104,7 @@ std::string	Channel::getActivesModes(){
 }
 
 bool	Channel::removeOperator(const std::string& nick){
-	Client* target = Util::getObjectByString(_members, nick);
+	Client* target = getClientByNick(nick);
 	if (!target)return false;
 	_operators[target->getFd()] = false;
 	return true;
@@ -134,4 +138,12 @@ void	Channel::broadcast(Server& server, Client& client, const std::string& msg, 
 		if (!sendSelf && it->first == client.getFd()) continue;
 		server.sendMessage((it->second), msg);
 	}
+}
+
+Client*	Channel::getClientByNick(const std::string& nick){
+	return Util::getObjectByString(_members, nick);
+}
+
+bool	Channel::isEmpty() const{
+	return _members.empty();
 }

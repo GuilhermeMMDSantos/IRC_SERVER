@@ -42,11 +42,15 @@ class Channel{
 			void	changeOmode(bool);
 			void	changeLmode(int);
 
+			bool	hasTmode() const;
+			bool	isEmpty() const;
+
 			void	broadcast(Server&, Client&, const std::string&, bool sendSelf);
 
 			std::string	getActivesModes();
 
 			std::map<int, Client>&	getMembers();
+			Client*					getClientByNick(const std::string&);
 			std::string				getMemberList() const;
 
 };

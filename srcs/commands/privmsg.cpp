@@ -17,7 +17,11 @@ void	Executor::privmsg(Server& server, Client& client, const Message& msg){
 	std::string text = params[1];
 	// quando a mensagem é para o canal
 	if (target[0] == '#' || target[0] == '&'){
-
+		Channel* chan = server.getChannelByName(target);
+		if (chan) {
+			std::string formatted = ":" + client.getNickName() + " PRIVMSG " + target + " :" + text;
+			chan->broadcast(server, client, formatted, false);
+		}
 	} else {
 		Client* targetClient = server.getClientByNick(target);
 		if (!targetClient){

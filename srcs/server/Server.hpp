@@ -46,6 +46,7 @@ class Server{
 		void	sendMessage(Client&, const std::string&);
 		Client*	getClientByNick(const std::string& nick);
 		Channel* getOrCreateChannel(const std::string& name);
+		void	removeChannel(const std::string& name);
 
 };
 #endif

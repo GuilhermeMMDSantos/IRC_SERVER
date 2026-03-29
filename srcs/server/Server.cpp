@@ -205,3 +205,7 @@ std::string	Server::activesModes(const std::string& channel){
 Channel* Server::getOrCreateChannel(const std::string& name){
 	return _channelMgr.getOrCreate(name);
 }
+
+void	Server::removeChannel(const std::string& name){
+	_channelMgr.removeChannel(name);
+}
