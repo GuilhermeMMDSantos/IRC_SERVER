@@ -1,8 +1,7 @@
 #include "Channel.hpp"
 
 Channel::Channel(const std::string& name)
-: _name(name), _topic(""), _userCount(0)
-{}
+: _name(name), _topic(""), _userCount(0){}
 
 const std::string& Channel::getName() const{
 	return _name;
@@ -10,6 +9,14 @@ const std::string& Channel::getName() const{
 
 const std::string& Channel::getTopic() const{
 	return _topic;
+}
+
+bool Channel::hasPassword() const{
+	return _modes.getKmode();
+}
+
+bool Channel::checkPassword(const std::string& pwd) const{
+	return _modes.getKey() == pwd;
 }
 
 
@@ -45,6 +52,10 @@ bool Channel::isOperator(int fd) const{
 
 std::map<int, Client>& Channel::getMembers(){
 	return _members;
+}
+
+bool	Channel::isFirstMember() const{
+	return _members.empty();
 }
 
 void	Channel::changeImode(bool b){
@@ -99,4 +110,19 @@ bool	Channel::addOperator(const std::string& nick){
 	if (!target)return false;
 	_operators[target->getFd()] = true;
 	return true;
+}
+
+std::string		Channel::getMemberList() const{
+	std::string list;
+
+	for (std::map<int, Client>::const_iterator it = _members.begin(); it != _members.end(); ++it){
+		if (!list.empty())
+			list += " ";
+
+		std::map<int, bool>::const_iterator opIt = _operators.find(it->first);
+		if (opIt != _operators.end() && opIt->second)
+			list += "@";
+		list += it->second.getNickName();
+	}
+	return list;
 }

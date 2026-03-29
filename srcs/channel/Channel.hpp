@@ -10,7 +10,6 @@
 class Server;
 
 class Channel{
-
 	private:
 		std::string				_name;
 		std::string				_topic;
@@ -24,8 +23,10 @@ class Channel{
 			const std::string&		getName() const;
 			const std::string&		getTopic() const;
 
+			void					setTopic(const std::string& topic);
 
-			void	setTopic(const std::string& topic);
+			bool					hasPassword() const;
+			bool					checkPassword( const std::string& pwd) const;
 
 			void	addMember( Client& client, bool isOperator = false);
 			void	removeMember(int fd);
@@ -33,8 +34,7 @@ class Channel{
 			bool	addOperator(const std::string&);
 			bool	isMember(int fd) const;
 			bool	isOperator(int fd) const;
-
-			std::map<int, Client>&	getMembers();
+			bool	isFirstMember() const;
 
 			void	changeImode(bool);
 			void	changeTmode(bool);
@@ -42,10 +42,12 @@ class Channel{
 			void	changeOmode(bool);
 			void	changeLmode(int);
 
-			void	brodcast(Server&, Client&, const std::string&);
+			void	broadcast(Server&, Client&, const std::string&);
 
 			std::string	getActivesModes();
-		  //  std::string             getMemberList() const;
+
+			std::map<int, Client>&	getMembers();
+			std::string				getMemberList() const;
 
 };
 

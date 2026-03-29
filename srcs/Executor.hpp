@@ -8,6 +8,8 @@
 #include "Message.hpp"
 #include "Mode.hpp"
 #include "util/Util.hpp"
+#include "Channel.hpp"
+#include "ChannelManager.hpp"
 
 class Server;
 
@@ -22,6 +24,7 @@ class Executor
 		void	cap(Server&, Client&, const Message&);
 		void	pass(Server&, Client&, const Message&);
 		void	nick(Server&, Client&, const Message&);
+		void	join(Server&, Client&, const Message&);
 		void	user(Server&, Client&, const Message&);
 		void	privmsg(Server&, Client&, const Message&);
 		void	mode(Server&, Client&, const Message&);

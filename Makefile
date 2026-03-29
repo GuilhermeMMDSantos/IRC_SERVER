@@ -18,8 +18,13 @@ SRCS = \
 	$(SRC_DIR)/client/ClientIdentity.cpp \
 	$(SRC_DIR)/client/ClientManager.cpp \
 	$(SRC_DIR)/client/ClientState.cpp \
+<<<<<<< HEAD
 	$(SRC_DIR)/channel/Mode.cpp \
 	$(SRC_DIR)/channel/Channel.cpp \
+=======
+	$(SRC_DIR)/channel/Channel.cpp \
+	$(SRC_DIR)/channel/ChannelManager.cpp \
+>>>>>>> feature/create_channel
 	$(SRC_DIR)/Message.cpp \
 	$(SRC_DIR)/Executor.cpp
 
@@ -30,7 +35,8 @@ INCLUDES = -I$(SRC_DIR) \
 	-I$(SRC_DIR)/channel \
 	-I$(SRC_DIR)/server \
 	-I$(SRC_DIR)/socket \
-	-I$(SRC_DIR)/client
+	-I$(SRC_DIR)/client \
+	-I$(SRC_DIR)/channel
 
 all: $(NAME)
 

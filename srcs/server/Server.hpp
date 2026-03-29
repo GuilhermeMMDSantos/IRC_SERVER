@@ -9,6 +9,7 @@
 #include <poll.h>
 #include "Socket.hpp"
 #include "ClientManager.hpp"
+#include "ChannelManager.hpp"
 #include "Message.hpp"
 #include "Executor.hpp"
 #include "Channel.hpp"
@@ -23,6 +24,7 @@ class Server{
 		std::vector<pollfd>					fds;
 		int									_tmpfd;
 		std::map<std::string, Channel>	_channels;
+		ChannelManager		_channelMgr;
 
 
 		void acceptClient();
@@ -44,5 +46,7 @@ class Server{
 
 		void	sendMessage(Client&, const std::string&);
 		Client*	getClientByNick(const std::string& nick);
+		Channel* getChannel(const std::string& name);
+
 };
 #endif

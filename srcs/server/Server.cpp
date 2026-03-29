@@ -204,3 +204,6 @@ std::string	Server::activesModes(const std::string& channel){
 	ch = (*target).getActivesModes();
 	return ch;
 }
+Channel* Server::getChannel(const std::string& name){
+	return _channelMgr.getOrCreate(name);
+}
