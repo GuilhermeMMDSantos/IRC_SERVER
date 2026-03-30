@@ -15,7 +15,6 @@ void	Executor::privmsg(Server& server, Client& client, const Message& msg){
 
 	std::string target = params[0];
 	std::string text = params[1];
-	// quando a mensagem é para o canal
 	if (target[0] == '#' || target[0] == '&'){
 		Channel* chan = server.getChannelByName(target);
 		if (chan) {

@@ -29,6 +29,10 @@ SRCS = \
 	$(SRC_DIR)/commands/nick.cpp \
 	$(SRC_DIR)/commands/pass.cpp \
 	$(SRC_DIR)/commands/privmsg.cpp \
+	$(SRC_DIR)/commands/ping.cpp \
+	$(SRC_DIR)/commands/kick.cpp \
+	$(SRC_DIR)/commands/topic.cpp \
+	$(SRC_DIR)/commands/invite.cpp \
 	$(SRC_DIR)/commands/user.cpp
 
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)

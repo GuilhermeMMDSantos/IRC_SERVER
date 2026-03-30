@@ -14,8 +14,10 @@ void Executor::join(Server& server, Client& client, const Message& msg){
 
 	Channel* channel = server.getOrCreateChannel(chanName);
 
-	if (!channel)
-		return server.sendMessage(client, ":"+ server._name + " 403 " + client.getNickName() + " " + chanName + " :No such channel");
+	if (!channel){
+		server.sendMessage(client, ":"+ server._name + " 403 " + client.getNickName() + " " + chanName + " :No such channel");
+		return ;
+	}
 
 	if (channel->hasImode() && !channel->wasInvited(client.getNickName())){
 		server.sendMessage(client,  ":"+ server._name + " 473 " + client.getNickName() + " " + chanName + " :Invite only channel");
@@ -35,10 +37,7 @@ void Executor::join(Server& server, Client& client, const Message& msg){
 						+ " JOIN " + chanName;
 
 	std::map<int, Client> members = channel->getMembers();
-
-	// Fazer um broadcast e tirar este loop
-	for (std::map<int, Client>::iterator it = members.begin(); it != members.end(); ++it)
-		server.sendMessage(it->second, joinMsg);
+	channel->broadcast(server, client, joinMsg, true);
 
 	if (!channel->getTopic().empty())
 		server.sendMessage(client, ":" + server._name +" 332 " + client.getNickName()

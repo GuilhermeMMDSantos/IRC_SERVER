@@ -30,7 +30,7 @@ class Channel{
 			bool					checkPassword( const std::string& pwd) const;
 
 			void	addMember( Client& client, bool isOperator = false);
-			void	addToInviteList(const std::string const&);
+			void	addToInviteList(const std::string&);
 			void	removeMember(int fd);
 			bool	removeOperator(const std::string&);
 			bool	addOperator(const std::string&);

@@ -152,7 +152,7 @@ bool	Channel::hasImode() const{
 	return _modes.getImode();
 }
 
-void	Channel::addToInviteList(const std::string const& nick){
+void	Channel::addToInviteList(const std::string& nick){
 	_inviteList.push_back(nick);
 }
 
