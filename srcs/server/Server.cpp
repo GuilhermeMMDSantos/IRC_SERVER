@@ -69,7 +69,8 @@ void Server::acceptClient(){
 void Server::disconnectClient(int fd){
 	std::cout << "[-] Client disconnected: fd=" << fd << std::endl;
 	close(fd);
-	std::map<std::string, Channel> channels = _channelMgr.getChannels();
+	std::map<std::string, Channel>& channels = _channelMgr.getChannels();
+	std::vector<std::string> toRemove;
 	std::map<std::string, Channel>::iterator it;
 
 	for (it = channels.begin(); it != channels.end() ; ++it){
@@ -77,8 +78,10 @@ void Server::disconnectClient(int fd){
 			it->second.removeMember(fd);
 		}
 		if (it->second.getUserCout() <= 0)
-			_channelMgr.removeChannel(it->first);
+			toRemove.push_back(it->first);
 	}
+	for (size_t i = 0; i < toRemove.size(); ++i)
+		_channelMgr.removeChannel(toRemove[i]);
 	_clientMgr.removeClient(fd);
 	for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); ++it){
 		if (it->fd == fd){
@@ -124,14 +127,6 @@ void Server::processMessage(int fd, const std::string& message){
 		return;
 	}
 	_executor.execute(*this, *client, msg);
-	//Tudo abaixo é para teste!! Apartir daqui pode usar a objecto msg (tipo class Message) para executar os comandos.
-	// std::cout << "Prefix: " << msg.getPrefix() << std::endl;
-	// std::cout << "Command: " << msg.getCommand() << std::endl;
-	// std::vector<std::string> params = msg.getParams();
-	// std::cout << "Param ";
-	// for (size_t i = 0; i <	params.size(); ++i)
-	// 	std::cout << i << ":[" << params[i] << " ] ";
-	// std::cout << "\n";
 }
 
 void Server::start(){
@@ -160,14 +155,16 @@ void Server::start(){
 				continue;
 			}
 
-			size_t currentSize = fds.size();
-			for (size_t i = 0; i < currentSize; ++i){
-				if (fds[i].revents == 0)
-					continue;
-				if (fds[i].fd == sockfd)
-					acceptClient();
-				else
-					handleClient(fds[i].fd);
+			for (int i = fds.size() - 1; i >= 0; --i){
+				if (fds[i].revents & (POLLHUP | POLLERR))
+					disconnectClient(fds[i].fd);
+				else if (fds[i].revents & POLLIN){
+					if (fds[i].fd == sockfd)
+						acceptClient();
+					else
+						handleClient(fds[i].fd);
+				}
+				fds[i].revents = 0;
 			}
 		}
 	}
