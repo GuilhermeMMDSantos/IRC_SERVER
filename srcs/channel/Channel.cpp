@@ -162,3 +162,11 @@ bool	Channel::wasInvited(const std::string& nick) const{
 	}
 	return false;
 }
+
+int	Channel::getUserCout() const{
+	return _userCount;
+}
+
+void	Channel::removerFromInvite(const std::string& nick){
+	_inviteList.erase(std::remove(_inviteList.begin(), _inviteList.end(), nick), _inviteList.end());
+}

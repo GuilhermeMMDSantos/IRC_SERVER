@@ -5,10 +5,10 @@ void	Executor::user(Server& server, Client& client, const Message& msg){
 	if (client.isRegisted()){
 		server.sendMessage(client, ":"+ server._name + " 462 * :Already registed)");
 	}
-	if (!client.hasNick()){
-		server.sendMessage(client, ":"+ server._name + " 462 * :You have not registered (need NICK)");
-		return;
-	}
+	//if (!client.hasNick()){
+	//	server.sendMessage(client, ":"+ server._name + " 462 * :You have not registered (need NICK)");
+	//	return;
+	//}
 	if (msg.getParams().size() < 4){
 		server.sendMessage(client, ":"+ server._name + " 461 * USER :Not enough parameters");
 		return ;
@@ -21,5 +21,6 @@ void	Executor::user(Server& server, Client& client, const Message& msg){
 	client.updateUser(m);
 	client.updateRealName(msg.getParams()[3]);
 	client.userCreated();
-	welcome(server, client);
+	if (client.hasPassword() && client.hasNick())
+		welcome(server, client);
 }

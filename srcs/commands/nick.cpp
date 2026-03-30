@@ -2,6 +2,7 @@
 #include "Server.hpp"
 
 void	Executor::nick(Server& server, Client& client, const Message& msg){
+	//if ()
 	if (!client.hasPassword()){
 		server.sendMessage(client, ":"+ server._name + " 462 * :You have not registered (need PASS)");
 	}
@@ -18,13 +19,24 @@ void	Executor::nick(Server& server, Client& client, const Message& msg){
 		server.sendMessage(client, ":"+ server._name + " 432 * NICK :" + m +" Erroneous Nickname");
 		return ;
 	}
+	Client* curClient = server.getClientByNick(m);
+	std::string oldnick;
 	if (!server.isNickAvailable(m)){
-		server.sendMessage(client, ":"+ server._name + " 433 * NICK :Nickname is already in use");
+		std::cout << "AQUI\n";
+		if (!curClient){
+			oldnick = "*";
+		} else
+			oldnick = curClient->getNickName();
+		// return ":localhost 433 " + nick + " " + newNick + " :Nickname is already in use\r\n";
+		server.sendMessage(client, ":"+ server._name + " 433 "+ oldnick + " " + m + " :Nickname is already in use");
 		return ;
 	}
 	client.updateNick(m);
 	client.nickCreated();
 	if (client.isRegisted()){
 		server.sendMessage(client, ":"+ server._name + " :You're now known as " + m);
+		return ;
 	}
+	if (client.hasPassword() && client.hasUser())
+		welcome(server, client);
 }
