@@ -69,6 +69,16 @@ void Server::acceptClient(){
 void Server::disconnectClient(int fd){
 	std::cout << "[-] Client disconnected: fd=" << fd << std::endl;
 	close(fd);
+	std::map<std::string, Channel> channels = _channelMgr.getChannels();
+	std::map<std::string, Channel>::iterator it;
+
+	for (it = channels.begin(); it != channels.end() ; ++it){
+		if (it->second.isMember(fd)){
+			it->second.removeMember(fd);
+		}
+		if (it->second.getUserCout() <= 0)
+			_channelMgr.removeChannel(it->first);
+	}
 	_clientMgr.removeClient(fd);
 	for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); ++it){
 		if (it->fd == fd){

@@ -18,11 +18,11 @@ void Executor::join(Server& server, Client& client, const Message& msg){
 		server.sendMessage(client, ":"+ server._name + " 403 " + client.getNickName() + " " + chanName + " :No such channel");
 		return ;
 	}
-
 	if (channel->hasImode() && !channel->wasInvited(client.getNickName())){
 		server.sendMessage(client,  ":"+ server._name + " 473 " + client.getNickName() + " " + chanName + " :Invite only channel");
 		return ;
 	}
+
 	if (channel->isMember(client.getFd())) return ;
 
 	if ( channel->hasPassword() && !channel->checkPassword(password)){
@@ -31,7 +31,7 @@ void Executor::join(Server& server, Client& client, const Message& msg){
 	}
 
 	channel->addMember(client, channel->isFirstMember());
-
+	channel->removerFromInvite(client.getNickName());
 	std::string joinMsg = ":" + client.getNickName() + "!~"
 						+ client.getUserName() + "@" + client.getIP()
 						+ " JOIN " + chanName;

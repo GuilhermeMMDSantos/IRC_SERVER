@@ -7,18 +7,22 @@
 
 class ChannelManager{
 
-    private:
-        std::map<std::string, Channel> _channels;
+	private:
+		std::map<std::string, Channel> _channels;
 
-        bool    isValidName(const std::string& name) const;
+		bool		isValidName(const std::string& name) const;
 
-    public:
+	public:
 
-        Channel*    getOrCreate(const std::string& name);
-        Channel*    getChannel(const std::string& name);
+		Channel*	getOrCreate(const std::string& name);
+		Channel*	getChannel(const std::string& name);
 
-        void        removeChannel(const std::string& name);
-        bool        channelExists(const std::string& name) const;
+		void		removeChannel(const std::string& name);
+		bool		channelExists(const std::string& name) const;
+
+		std::map<std::string, Channel>& getChannels();
+
+
 };
 
 #endif

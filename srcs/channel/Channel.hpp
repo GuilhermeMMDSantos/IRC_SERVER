@@ -33,10 +33,12 @@ class Channel{
 			void	addToInviteList(const std::string&);
 			void	removeMember(int fd);
 			bool	removeOperator(const std::string&);
+			void	removerFromInvite(const std::string&);
 			bool	addOperator(const std::string&);
 			bool	isMember(int fd) const;
 			bool	isOperator(int fd) const;
 			bool	isFirstMember() const;
+			int		getUserCout() const;
 
 			void	changeImode(bool);
 			void	changeTmode(bool);
