@@ -183,10 +183,29 @@ void Server::sendMessage(Client& client, const std::string& msg){
 	}
 }
 
-bool	Server::isNickAvailable(const std::string& nick) const{
+bool	Server::isNickAvailable(const std::string& nick) {
 	return _clientMgr.isNickUnique(nick);
 }
 
 Client*	Server::getClientByNick(const std::string& nick){
 	return _clientMgr.getByNick(nick);
+}
+
+Channel*	Server::getChannelByName(const std::string& name){
+ 	return _channelMgr.getChannel(name);
+}
+
+std::string	Server::activesModes(const std::string& channel){
+	std::string ch = "";
+	Channel *target = getChannelByName(channel);
+	if (!target) return ch;
+	ch = (*target).getActivesModes();
+	return ch;
+}
+Channel* Server::getOrCreateChannel(const std::string& name){
+	return _channelMgr.getOrCreate(name);
+}
+
+void	Server::removeChannel(const std::string& name){
+	_channelMgr.removeChannel(name);
 }
