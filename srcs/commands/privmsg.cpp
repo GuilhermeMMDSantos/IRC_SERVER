@@ -18,13 +18,16 @@ void	Executor::privmsg(Server& server, Client& client, const Message& msg){
 	if (target[0] == '#' || target[0] == '&'){
 		Channel* chan = server.getChannelByName(target);
 		if (chan) {
+			if (!chan->isMember(client.getFd())){
+				server.sendMessage(client, ":"+ server._name + " 442 " + client.getNickName()+ " " + target +  ":You're not on that channel");
+				return;
+			}
 			std::string formatted = ":" + client.getNickName() + " PRIVMSG " + target + " :" + text;
 			chan->broadcast(server, client, formatted, false);
 		}
 	} else {
 		Client* targetClient = server.getClientByNick(target);
 		if (!targetClient){
-
 			server.sendMessage(client, ":"+ server._name + " 401 " + target + " :No such nick");
 			return;
 		}
