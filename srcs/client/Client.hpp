@@ -6,6 +6,8 @@
 #include "ClientConnection.hpp"
 #include "ClientState.hpp"
 
+#define MAX_RECVQ_SIZE 65536
+
 class Client
 {
 	private:

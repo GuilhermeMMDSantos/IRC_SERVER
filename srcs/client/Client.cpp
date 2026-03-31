@@ -6,11 +6,14 @@ Client::Client(const ClientConnection& connection, std::string recvQ): _connecti
 bool Client::updaterecvQ(std::string recvBuf)
 {
 	this->_recvQ += recvBuf;
-	if (_recvQ.size() > 512 && _recvQ.find('\n') == std::string::npos){
+
+	if (_recvQ.size() > MAX_RECVQ_SIZE)
 		return false;
-	}
-	if (_recvQ.size() > 1024)
+
+	size_t lastNewline = _recvQ.rfind('\n');
+	if (lastNewline == std::string::npos && _recvQ.size() > 512)
 		return false;
+
 	return true;
 }
 
