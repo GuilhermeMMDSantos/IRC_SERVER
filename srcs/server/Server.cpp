@@ -68,27 +68,37 @@ void Server::acceptClient(){
 
 void Server::disconnectClient(int fd){
 	std::cout << "[-] Client disconnected: fd=" << fd << std::endl;
-	close(fd);
-	std::map<std::string, Channel> channels = _channelMgr.getChannels();
-	std::map<std::string, Channel>::iterator it;
-
-	for (it = channels.begin(); it != channels.end() ; ++it){
-		if (it->second.isMember(fd)){
-			it->second.removeMember(fd);
-		}
-		if (it->second.getUserCout() <= 0)
-			_channelMgr.removeChannel(it->first);
-	}
-	_clientMgr.removeClient(fd);
 	for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); ++it){
 		if (it->fd == fd){
 			fds.erase(it);
 			break;
 		}
 	}
+
+	_clientMgr.removeClient(fd);
+
+	std::map<std::string, Channel>& channels = _channelMgr.getChannels();
+	std::vector<std::string> toRemove;
+	std::map<std::string, Channel>::iterator it;
+	for (it = channels.begin(); it != channels.end() ; ++it){
+		if (it->second.isMember(fd)){
+			it->second.removeMember(fd);
+		}
+		if (it->second.getUserCout() <= 0)
+			toRemove.push_back(it->first);
+	}
+	for (size_t i = 0; i < toRemove.size(); ++i)
+		_channelMgr.removeChannel(toRemove[i]);
+
+	close(fd);
 }
 
 void Server::handleClient(int fd){
+	Client* client = _clientMgr.getClient(fd);
+	if (!client){
+		std::cerr << "Warning: Received event for non-existent client fd=" << fd << std::endl;
+		return;
+	}
 
 	char buf[BUFFER_SIZE];
 	ssize_t bytesRead = recv(fd, buf, sizeof(buf) - 1, 0);
@@ -96,7 +106,6 @@ void Server::handleClient(int fd){
 		disconnectClient(fd);
 		return ;
 	}
-
 	buf[bytesRead] = '\0';
 
 	if (!_clientMgr.updaterecvQ(fd, std::string(buf, bytesRead))){
@@ -105,9 +114,20 @@ void Server::handleClient(int fd){
 	}
 
 	std::string message;
-	while (_clientMgr.extractMessage(fd, message)){
-		if (!message.empty())
+	while (true)
+	{
+		int status = _clientMgr.extractMessage(fd, message);
+
+		if (status == 1) {
 			processMessage(fd, message);
+		} else if (status == 0) {
+			break;
+		} else if (status == -1) {
+			disconnectClient(fd);
+			return;
+		} else if (status == -2) {
+			continue;
+		}
 	}
 }
 
@@ -124,14 +144,6 @@ void Server::processMessage(int fd, const std::string& message){
 		return;
 	}
 	_executor.execute(*this, *client, msg);
-	//Tudo abaixo é para teste!! Apartir daqui pode usar a objecto msg (tipo class Message) para executar os comandos.
-	// std::cout << "Prefix: " << msg.getPrefix() << std::endl;
-	// std::cout << "Command: " << msg.getCommand() << std::endl;
-	// std::vector<std::string> params = msg.getParams();
-	// std::cout << "Param ";
-	// for (size_t i = 0; i <	params.size(); ++i)
-	// 	std::cout << i << ":[" << params[i] << " ] ";
-	// std::cout << "\n";
 }
 
 void Server::start(){
@@ -159,15 +171,18 @@ void Server::start(){
 				std::cerr << "Warning: poll interrupted" << std::endl;
 				continue;
 			}
-
-			size_t currentSize = fds.size();
-			for (size_t i = 0; i < currentSize; ++i){
-				if (fds[i].revents == 0)
-					continue;
-				if (fds[i].fd == sockfd)
-					acceptClient();
-				else
-					handleClient(fds[i].fd);
+			short curRevents;
+			for (int i = fds.size() - 1; i >= 0; --i){
+				curRevents = fds[i].revents;
+				fds[i].revents = 0;
+				if (curRevents & (POLLHUP | POLLERR))
+					disconnectClient(fds[i].fd);
+				else if (curRevents & POLLIN){
+					if (fds[i].fd == sockfd)
+						acceptClient();
+					else
+						handleClient(fds[i].fd);
+				}
 			}
 		}
 	}
