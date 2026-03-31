@@ -92,7 +92,7 @@ void Server::disconnectClient(int fd){
 }
 
 void Server::handleClient(int fd){
-
+	std::cout << "[DEBUG] Recebi evento no FD: " << fd << std::endl;
 	char buf[BUFFER_SIZE];
 	ssize_t bytesRead = recv(fd, buf, sizeof(buf) - 1, 0);
 	if (bytesRead <= 0){
@@ -108,10 +108,26 @@ void Server::handleClient(int fd){
 	}
 
 	std::string message;
-	while (_clientMgr.extractMessage(fd, message)){
-		if (!message.empty())
+	// while (_clientMgr.extractMessage(fd, message)){
+	// 	if (!message.empty())
+	// 		processMessage(fd, message);
+	// }
+	while (true)
+	{
+		int status = _clientMgr.extractMessage(fd, message);
+
+		if (status == 1) { // Sucesso
 			processMessage(fd, message);
+		} else if (status == 0) { // Incompleto
+			break;
+		} else if (status == -1) { // Abuso de protocolo
+			disconnectClient(fd);
+			return;
+		} else if (status == -2) { // Linha muito longa (já limpa)
+			continue;
+		}
 	}
+
 }
 
 void Server::processMessage(int fd, const std::string& message){
@@ -148,6 +164,7 @@ void Server::start(){
 		std::cout << "Press Ctrl+C to stop\n" << std::endl;
 		while (_isRunning)
 		{
+			std::cout << "[POLL] Monitorizando " << fds.size() << " FDs." << std::endl;
 			int ready = poll(fds.data(), fds.size(), -1);
 			if (ready < 0 ){
 				if (errno == EINTR) continue;
