@@ -68,11 +68,18 @@ void Server::acceptClient(){
 
 void Server::disconnectClient(int fd){
 	std::cout << "[-] Client disconnected: fd=" << fd << std::endl;
-	close(fd);
+	for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); ++it){
+		if (it->fd == fd){
+			fds.erase(it);
+			break;
+		}
+	}
+
+	_clientMgr.removeClient(fd);
+
 	std::map<std::string, Channel>& channels = _channelMgr.getChannels();
 	std::vector<std::string> toRemove;
 	std::map<std::string, Channel>::iterator it;
-
 	for (it = channels.begin(); it != channels.end() ; ++it){
 		if (it->second.isMember(fd)){
 			it->second.removeMember(fd);
@@ -82,24 +89,23 @@ void Server::disconnectClient(int fd){
 	}
 	for (size_t i = 0; i < toRemove.size(); ++i)
 		_channelMgr.removeChannel(toRemove[i]);
-	_clientMgr.removeClient(fd);
-	for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); ++it){
-		if (it->fd == fd){
-			fds.erase(it);
-			break;
-		}
-	}
+
+	close(fd);
 }
 
 void Server::handleClient(int fd){
-	std::cout << "[DEBUG] Recebi evento no FD: " << fd << std::endl;
+	Client* client = _clientMgr.getClient(fd);
+	if (!client){
+		std::cerr << "Warning: Received event for non-existent client fd=" << fd << std::endl;
+		return;
+	}
+
 	char buf[BUFFER_SIZE];
 	ssize_t bytesRead = recv(fd, buf, sizeof(buf) - 1, 0);
 	if (bytesRead <= 0){
 		disconnectClient(fd);
 		return ;
 	}
-
 	buf[bytesRead] = '\0';
 
 	if (!_clientMgr.updaterecvQ(fd, std::string(buf, bytesRead))){
@@ -108,26 +114,21 @@ void Server::handleClient(int fd){
 	}
 
 	std::string message;
-	// while (_clientMgr.extractMessage(fd, message)){
-	// 	if (!message.empty())
-	// 		processMessage(fd, message);
-	// }
 	while (true)
 	{
 		int status = _clientMgr.extractMessage(fd, message);
 
-		if (status == 1) { // Sucesso
+		if (status == 1) {
 			processMessage(fd, message);
-		} else if (status == 0) { // Incompleto
+		} else if (status == 0) {
 			break;
-		} else if (status == -1) { // Abuso de protocolo
+		} else if (status == -1) {
 			disconnectClient(fd);
 			return;
-		} else if (status == -2) { // Linha muito longa (já limpa)
+		} else if (status == -2) {
 			continue;
 		}
 	}
-
 }
 
 void Server::processMessage(int fd, const std::string& message){
@@ -164,24 +165,24 @@ void Server::start(){
 		std::cout << "Press Ctrl+C to stop\n" << std::endl;
 		while (_isRunning)
 		{
-			std::cout << "[POLL] Monitorizando " << fds.size() << " FDs." << std::endl;
 			int ready = poll(fds.data(), fds.size(), -1);
 			if (ready < 0 ){
 				if (errno == EINTR) continue;
 				std::cerr << "Warning: poll interrupted" << std::endl;
 				continue;
 			}
-
+			short curRevents;
 			for (int i = fds.size() - 1; i >= 0; --i){
-				if (fds[i].revents & (POLLHUP | POLLERR))
+				curRevents = fds[i].revents;
+				fds[i].revents = 0;
+				if (curRevents & (POLLHUP | POLLERR))
 					disconnectClient(fds[i].fd);
-				else if (fds[i].revents & POLLIN){
+				else if (curRevents & POLLIN){
 					if (fds[i].fd == sockfd)
 						acceptClient();
 					else
 						handleClient(fds[i].fd);
 				}
-				fds[i].revents = 0;
 			}
 		}
 	}

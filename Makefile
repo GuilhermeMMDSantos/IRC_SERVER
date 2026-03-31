@@ -1,9 +1,5 @@
 CC      = c++
 CFLAGS  = -Wall -Wextra -Werror -std=c++98 -g
-DEBUG ?= 0
-ifeq ($(DEBUG),1)
-	CFLAGS += -g -DDEBUG
-endif
 NAME	= ircserv
 
 SRC_DIR = srcs

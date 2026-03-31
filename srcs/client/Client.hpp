@@ -18,7 +18,7 @@ class Client
 		Client(const ClientConnection& connection, std::string recvQ = "");
 
 		bool	updaterecvQ(std::string recvBuf);
-		bool	extractMessage(std::string& line);
+		int		extractMessage(std::string& line);
 
 		bool	isRegisted() const;
 		bool	hasPassword() const;

@@ -31,7 +31,7 @@ bool	ClientManager::updaterecvQ(int fd, std::string recvBuf){
 	return true;
 }
 
-bool	ClientManager::extractMessage(int fd, std::string& line){
+int	ClientManager::extractMessage(int fd, std::string& line){
 	std::map<int, Client>::iterator it = _clients.find(fd);
 	if (it == _clients.end())
 		return false;

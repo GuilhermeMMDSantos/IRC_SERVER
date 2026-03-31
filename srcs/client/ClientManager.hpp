@@ -15,7 +15,7 @@ class ClientManager
 		void	addClient(const ClientConnection& connection, std::string recvQ = "");
 		void	removeClient(int fd);
 		bool	updaterecvQ(int fd, std::string recvBuf);
-		bool	extractMessage(int fd, std::string& line);
+		int		extractMessage(int fd, std::string& line);
 		Client*	getClient(int fd);
 		Client*	getByNick(const std::string& nick);
 		std::map<int, Client>& getAllClient();
