@@ -13,7 +13,6 @@ class Modes{
 		bool		_imode;
 		bool		_tmode;
 		bool		_kmode;
-		bool		_omode;
 		int			_limit;
 		std::string	_key;
 
@@ -24,7 +23,6 @@ class Modes{
 		void	updateImode(bool);
 		void	updateTmode(bool);
 		void	updateKmode(bool, const std::string&);
-		void	updateOmode(bool);
 		void	updateLimit(int);
 
 		std::string	getKey() const;
@@ -32,7 +30,6 @@ class Modes{
 		bool	getTmode() const;
 		bool	getImode() const;
 		bool	getKmode() const;
-		bool	getOmode() const;
 		int		getLimit() const;
 
 };

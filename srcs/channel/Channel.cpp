@@ -4,10 +4,6 @@
 Channel::Channel(const std::string& name)
 : _name(name), _topic(""), _userCount(0){}
 
-const std::string& Channel::getName() const{
-	return _name;
-}
-
 const std::string& Channel::getTopic() const{
 	return _topic;
 }
@@ -69,10 +65,6 @@ void	Channel::changeTmode(bool b){
 
 void	Channel::changeKmode(bool b, const std::string& key){
 	_modes.updateKmode(b, key);
-}
-
-void	Channel::changeOmode(bool b){
-	_modes.updateOmode(b);
 }
 
 void	Channel::changeLmode(int b){

@@ -9,10 +9,6 @@ void	Message::skipSpace(const std::string& msg){
 		++_pos;
 }
 
-std::string	Message::getPrefix() const{
-	return _prefix;
-}
-
 std::string	Message::getCommand() const{
 	return _command;
 }

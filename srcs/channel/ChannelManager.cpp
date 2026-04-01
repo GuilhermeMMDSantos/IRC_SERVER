@@ -37,11 +37,6 @@ void ChannelManager::removeChannel(const std::string& name){
 	_channels.erase(name);
 }
 
-bool ChannelManager::channelExists(const std::string& name) const{
-	return _channels.find(name) != _channels.end();
-}
-
-
 std::map<std::string, Channel>& ChannelManager::getChannels(){
 	return _channels;
 }

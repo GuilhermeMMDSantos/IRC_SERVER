@@ -1,7 +1,7 @@
 #include "Mode.hpp"
 
 Modes::Modes():_imode(false), _tmode(false), _kmode(false), \
-			_omode(false), _limit(0), _key(""){}
+			_limit(0), _key(""){}
 
 void	Modes::setKey(const std::string& key){
 	_key = key;
@@ -18,9 +18,6 @@ void	Modes::updateKmode(bool b, const std::string& key){
 	if (b) setKey(key);
 	else _key.clear();
 }
-void	Modes::updateOmode(bool b){
-	_omode = b;
-}
 void	Modes::updateLimit(int b){
 	_limit = b;
 }
@@ -35,10 +32,6 @@ bool	Modes::getImode() const{
 
 bool	Modes::getKmode() const{
 	return _kmode;
-}
-
-bool	Modes::getOmode() const{
-	return _omode;
 }
 
 int	Modes::getLimit() const{

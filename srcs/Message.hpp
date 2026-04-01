@@ -24,7 +24,6 @@ class Message
 	public:
 		Message();
 
-		std::string					getPrefix() const;
 		std::string					getCommand() const;
 		std::vector<std::string>	getParams() const;
 

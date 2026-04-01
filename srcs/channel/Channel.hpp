@@ -21,7 +21,6 @@ class Channel{
 
 		public:
 			Channel(const std::string& name);
-			const std::string&		getName() const;
 			const std::string&		getTopic() const;
 
 			void					setTopic(const std::string& topic);
@@ -43,7 +42,6 @@ class Channel{
 			void	changeImode(bool);
 			void	changeTmode(bool);
 			void	changeKmode(bool, const std::string&);
-			void	changeOmode(bool);
 			void	changeLmode(int);
 
 			bool	hasTmode() const;

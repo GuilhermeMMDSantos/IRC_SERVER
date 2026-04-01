@@ -2,7 +2,6 @@
 #include "Server.hpp"
 
 void	Executor::nick(Server& server, Client& client, const Message& msg){
-	//if ()
 	if (!client.hasPassword()){
 		server.sendMessage(client, ":"+ server._name + " 462 * :You have not registered (need PASS)");
 	}
@@ -27,7 +26,6 @@ void	Executor::nick(Server& server, Client& client, const Message& msg){
 			oldnick = "*";
 		} else
 			oldnick = curClient->getNickName();
-		// return ":localhost 433 " + nick + " " + newNick + " :Nickname is already in use\r\n";
 		server.sendMessage(client, ":"+ server._name + " 433 "+ oldnick + " " + m + " :Nickname is already in use");
 		return ;
 	}

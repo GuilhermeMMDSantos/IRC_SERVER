@@ -84,7 +84,6 @@ void	Executor::mode(Server& server, Client& client, const Message& msg){
 				server.sendMessage(client, ":" + server._name + " 441 " + client.getNickName() + " " + targetNick + " " + canal + " :They aren't on that channel");
 				break;
 			}
-			channel->changeOmode(true);
 			response = ":" + client.getNickName() + "!" + client.getUserName() + "@" + client.getIP() + " MODE " + canal + " " + (adding ? "+" : "-") + c + " " + targetNick;
 			channel->broadcast(server, client, response, true);
 			break;
