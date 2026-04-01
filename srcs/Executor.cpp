@@ -13,6 +13,7 @@ Executor::Executor(){
 	_command.insert(std::make_pair("PING", &Executor::ping));
 	_command.insert(std::make_pair("KICK", &Executor::kick));
 	_command.insert(std::make_pair("INVITE", &Executor::invite));
+	_command.insert(std::make_pair("TOPIC", &Executor::topic));
 }
 
 bool	Executor::isValidName(const std::string& nick){

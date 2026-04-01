@@ -48,6 +48,7 @@ class Channel{
 
 			bool	hasTmode() const;
 			bool	hasImode() const;
+			int		hasLmode() const;
 			bool	wasInvited(const std::string&) const;
 			bool	isEmpty() const;
 

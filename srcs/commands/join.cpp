@@ -18,6 +18,12 @@ void Executor::join(Server& server, Client& client, const Message& msg){
 		server.sendMessage(client, ":"+ server._name + " 403 " + client.getNickName() + " " + chanName + " :No such channel");
 		return ;
 	}
+
+	if (channel->hasLmode() && (channel->hasLmode() <= channel->getUserCout()) ){
+		server.sendMessage(client, ":"+ server._name + " 471 " + client.getNickName() + " " + chanName + " :Cannot join channel (+l)" );
+		return ;
+	}
+
 	if (channel->hasImode() && !channel->wasInvited(client.getNickName())){
 		server.sendMessage(client,  ":"+ server._name + " 473 " + client.getNickName() + " " + chanName + " :Invite only channel");
 		return ;

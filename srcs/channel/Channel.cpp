@@ -152,6 +152,12 @@ bool	Channel::hasImode() const{
 	return _modes.getImode();
 }
 
+int		Channel::hasLmode() const{
+	return _modes.getLimit();
+}
+
+
+
 void	Channel::addToInviteList(const std::string& nick){
 	_inviteList.push_back(nick);
 }

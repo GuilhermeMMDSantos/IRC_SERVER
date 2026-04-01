@@ -5,7 +5,7 @@ void	Executor::privmsg(Server& server, Client& client, const Message& msg){
 	if (!verify(server, client)) return ;
 	std::vector<std::string> params = msg.getParams();
 	if (params.empty()){
-		server.sendMessage(client, ":"+ server._name + " 411 :No recipient given (PRIVMSG)");
+		server.sendMessage(client, ":"+ server._name + " 461 * PRIVMSG :Not enough parameters");
 		return;
 	}
 	if (params.size() < 2 || params[1].empty()){

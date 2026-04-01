@@ -5,7 +5,7 @@ void Executor::topic(Server& server, Client& client, const Message& msg) {
 	if (!verify(server, client)) return ;
 	std::vector<std::string> params = msg.getParams();
 	if (params.empty()) {
-		server.sendMessage(client, ":"+ server._name + " 461 * NICK :Not enough parameters");
+		server.sendMessage(client, ":" + server._name + " 461 " + client.getNickName() + " TOPIC :Not enough parameters");
 		return;
 	}
 
