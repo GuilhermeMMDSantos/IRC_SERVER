@@ -1,5 +1,5 @@
 CC      = c++
-CFLAGS  = -Wall -Wextra -Werror -std=c++98 -g -Wunused-function
+CFLAGS  = -Wall -Wextra -Werror -std=c++98
 NAME	= ircserv
 
 SRC_DIR = srcs
