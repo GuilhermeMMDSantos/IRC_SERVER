@@ -5,6 +5,7 @@
 #define BUFFER_SIZE 4096
 
 #include <cerrno>
+#include <fstream>
 #include <vector>
 #include <poll.h>
 #include "Socket.hpp"
@@ -22,7 +23,8 @@ class Server{
 		const std::string					_password;
 		bool								_isRunning;
 		std::vector<pollfd>					fds;
-		int									_tmpfd;
+		std::ifstream						_tmpfd;
+		int									_maxClients;
 		ChannelManager						_channelMgr;
 
 
@@ -36,6 +38,7 @@ class Server{
 
 		void	start();
 		void	stop();
+		void	detectMaxClients();
 		void	disconnectClient(int fd);
 
 		std::string	getPassword() const;

@@ -45,3 +45,8 @@ void	ClientManager::clear(){
 bool	ClientManager::isNickUnique(const std::string& nick) {
 	return Util::getObjectByString(_clients, nick) == NULL;
 }
+
+
+int		ClientManager::getClientsSize() const{
+	return _clients.size();
+}

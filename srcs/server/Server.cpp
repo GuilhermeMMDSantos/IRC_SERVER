@@ -1,10 +1,9 @@
 #include "Server.hpp"
 
 Server::Server(const char *port, const std::string& password)
-:_socket(port), _password(password), _isRunning(false), _name("ft_irc.42.fr")
+:_socket(port), _password(password), _isRunning(false), _tmpfd("/dev/null"),_name("ft_irc.42.fr")
 {
-	_tmpfd = open("/dev/null", O_RDONLY);
-	if (_tmpfd < 0){
+	if (!_tmpfd.is_open()){
 		throw std::runtime_error("open /dev/null");
 	}
 }
@@ -28,7 +27,7 @@ void Server::stop()
 	}
 	fds.clear();
 	_clientMgr.clear();
-	close(_tmpfd);
+	_tmpfd.close();
 	close(_socket.getSockFd());
 	std::cout << "Server stoped!" << std::endl;
 }
@@ -37,16 +36,16 @@ void Server::acceptClient(){
 	ClientConnection client = _socket.acceptClient();
 	int clientfd = client.getfd();
 	if (clientfd < 0){
-		if (errno == EMFILE || errno == ENFILE){
-			close(_tmpfd);
+		if (_clientMgr.getClientsSize() >= _maxClients){
+			_tmpfd.close();
 			client.clear();
 			client = _socket.acceptClient();
 			clientfd = client.getfd();
 			if (clientfd >= 0){
 				close(clientfd);
 			}
-			_tmpfd = open("/dev/null", O_RDONLY);
-			if (_tmpfd < 0){
+			_tmpfd.open("/dev/null");
+			if (!_tmpfd.is_open()){
 				std::cerr << "Error: open /dev/null\n";
 				stop();
 			}
@@ -151,6 +150,7 @@ void Server::start(){
 	try
 	{
 		_socket.start();
+		detectMaxClients();
 		int sockfd = _socket.getSockFd();
 
 		pollfd pfd;
@@ -162,6 +162,7 @@ void Server::start(){
 		_isRunning = true;
 		std::cout << "=== IRC Server started ===" << std::endl;
 		std::cout << "Port: " << _socket.getPort() << std::endl;
+		std::cout << "Max Clients: " << _maxClients << std::endl;
 		std::cout << "Press Ctrl+C to stop\n" << std::endl;
 		while (_isRunning)
 		{
@@ -233,4 +234,20 @@ Channel* Server::getOrCreateChannel(const std::string& name){
 
 void	Server::removeChannel(const std::string& name){
 	_channelMgr.removeChannel(name);
+}
+
+void	Server::detectMaxClients(){
+	std::vector<int>	tmp_fds;
+	int					count = 0;
+
+	while(true){
+		int fd = socket(AF_INET, SOCK_STREAM, 0);
+		if (fd < 0) break;
+		tmp_fds.push_back(fd);
+		count++;
+	}
+	for (size_t i = 0; i < tmp_fds.size(); ++i) {
+		close(tmp_fds[i]);
+	}
+	_maxClients = count;
 }

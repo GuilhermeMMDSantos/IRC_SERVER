@@ -21,6 +21,7 @@ class ClientManager
 		std::map<int, Client>& getAllClient();
 		void	clear();
 		bool	isNickUnique(const std::string&);
+		int		getClientsSize() const;
 };
 
 #endif
