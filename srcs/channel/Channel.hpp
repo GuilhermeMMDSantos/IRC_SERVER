@@ -14,7 +14,7 @@ class Channel{
 		std::string					_name;
 		std::string					_topic;
 		Modes						_modes;
-		std::map<int, Client>		_members;
+		std::map<int, Client*>		_members;
 		std::map<int, bool>			_operators;
 		int							_userCount;
 		std::vector<std::string>	_inviteList;
@@ -56,7 +56,7 @@ class Channel{
 
 			std::string	getActivesModes();
 
-			std::map<int, Client>&	getMembers();
+			std::map<int, Client*>&	getMembers();
 			Client*					getClientByNick(const std::string&);
 			std::string				getMemberList() const;
 
