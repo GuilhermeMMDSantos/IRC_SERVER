@@ -75,8 +75,6 @@ void Server::disconnectClient(int fd){
 		}
 	}
 
-	_clientMgr.removeClient(fd);
-
 	std::map<std::string, Channel>& channels = _channelMgr.getChannels();
 	std::vector<std::string> toRemove;
 	std::map<std::string, Channel>::iterator it;
@@ -90,6 +88,7 @@ void Server::disconnectClient(int fd){
 	for (size_t i = 0; i < toRemove.size(); ++i)
 		_channelMgr.removeChannel(toRemove[i]);
 
+	_clientMgr.removeClient(fd);
 	close(fd);
 }
 
