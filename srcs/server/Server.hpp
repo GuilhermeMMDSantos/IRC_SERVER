@@ -28,6 +28,7 @@ class Server{
 
 		void acceptClient();
 		void handleClient(int fd);
+		void handlerSendClient(int);
 		void processMessage(int fd, const std::string& message);
 	public:
 		const std::string	_name;
