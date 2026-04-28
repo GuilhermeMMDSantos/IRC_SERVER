@@ -13,6 +13,7 @@ class Client
 	private:
 		ClientConnection	_connection;
 		std::string			_recvQ;
+		std::string			_sendQ;
 		ClientIdentity		_identity;
 		ClientState			_states;
 
@@ -20,6 +21,9 @@ class Client
 		Client(const ClientConnection& connection, std::string recvQ = "");
 
 		bool	updaterecvQ(std::string recvBuf);
+		void	addToSendQ(const std::string& sendBuf);
+		std::string&	getSendQ();
+		bool			sendQisEmpty() const;
 		int		extractMessage(std::string& line);
 
 		bool	isRegisted() const;

@@ -146,6 +146,19 @@ void Server::processMessage(int fd, const std::string& message){
 	_executor.execute(*this, *client, msg);
 }
 
+void Server::handlerSendClient(int fd){
+	Client* client = _clientMgr.getClient(fd);
+	if (!client || client->sendQisEmpty()) return;
+	std::string& queue = client->getSendQ();
+	ssize_t bytesSent = send(fd, queue.c_str(), queue.size(), 0);
+
+	if (bytesSent > 0) {
+		queue.erase(0, bytesSent);
+	} else if (bytesSent < 0) {
+			disconnectClient(fd);
+	}
+}
+
 void Server::start(){
 
 	try
@@ -165,6 +178,14 @@ void Server::start(){
 		std::cout << "Press Ctrl+C to stop\n" << std::endl;
 		while (_isRunning)
 		{
+			for (size_t i = 0; i < fds.size() ; ++i){
+				fds[i].events = POLLIN;
+
+				Client* client = _clientMgr.getClient(fds[i].fd);
+				if (client && !client->sendQisEmpty()){
+					fds[i].events |= POLLOUT;
+				}
+			}
 			int ready = poll(fds.data(), fds.size(), -1);
 			if (ready < 0 ){
 				if (errno == EINTR) continue;
@@ -177,11 +198,15 @@ void Server::start(){
 				fds[i].revents = 0;
 				if (curRevents & (POLLHUP | POLLERR))
 					disconnectClient(fds[i].fd);
-				else if (curRevents & POLLIN){
-					if (fds[i].fd == sockfd)
-						acceptClient();
-					else
-						handleClient(fds[i].fd);
+				else {
+					if (curRevents & POLLOUT)
+						handlerSendClient(fds[i].fd);
+					if (curRevents & POLLIN){
+						if (fds[i].fd == sockfd)
+							acceptClient();
+						else
+							handleClient(fds[i].fd);
+					}
 				}
 			}
 		}
@@ -194,18 +219,7 @@ void Server::start(){
 }
 
 void Server::sendMessage(Client& client, const std::string& msg){
-	std::string message = msg + "\r\n";
-	const char* buffer = message.c_str();
-	size_t total = message.size();
-	size_t sent = 0;
-	while (sent < total){
-		ssize_t bytes = send(client.getFd(), buffer + sent, total - sent, 0);
-		if (bytes <= 0){
-			std::cerr << "send() falied\n";
-			break ;
-		}
-		sent += bytes;
-	}
+	client.addToSendQ(msg + "\r\n");
 }
 
 bool	Server::isNickAvailable(const std::string& nick) {

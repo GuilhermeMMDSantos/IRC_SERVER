@@ -105,3 +105,14 @@ std::string	Client::getUserName() const{
 std::string	Client::getIP() const{
 	return _connection.getIP();
 }
+
+void	Client::addToSendQ(const std::string& sendBuf){
+	_sendQ += sendBuf;
+}
+std::string&	Client::getSendQ(){
+	return _sendQ;
+}
+
+bool	Client::sendQisEmpty() const{
+	return _sendQ.empty();
+}
