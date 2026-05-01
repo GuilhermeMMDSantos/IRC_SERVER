@@ -42,7 +42,6 @@ void Executor::join(Server& server, Client& client, const Message& msg){
 						+ client.getUserName() + "@" + client.getIP()
 						+ " JOIN " + chanName;
 
-	std::map<int, Client> members = channel->getMembers();
 	channel->broadcast(server, client, joinMsg, true);
 
 	if (!channel->getTopic().empty())

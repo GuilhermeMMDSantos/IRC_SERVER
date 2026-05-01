@@ -24,7 +24,7 @@ void Channel::setTopic(const std::string& topic){
 
 void Channel::addMember(Client& client, bool isOperator){
 	int fd = client.getFd();
-	_members.insert(std::make_pair(fd, client));
+	_members.insert(std::make_pair(fd, &client));
 	_operators.insert(std::make_pair(fd, isOperator));
 	++_userCount;
 }
@@ -47,7 +47,7 @@ bool Channel::isOperator(int fd) const{
 	return it->second;
 }
 
-std::map<int, Client>& Channel::getMembers(){
+std::map<int, Client*>& Channel::getMembers(){
 	return _members;
 }
 
@@ -103,8 +103,8 @@ bool	Channel::removeOperator(const std::string& nick){
 }
 
 bool	Channel::addOperator(const std::string& nick){
-	Client* target = Util::getObjectByString(_members, nick);
-	if (!target)return false;
+	Client* target = getClientByNick(nick);
+	if (!target) return false;
 	_operators[target->getFd()] = true;
 	return true;
 }
@@ -112,28 +112,34 @@ bool	Channel::addOperator(const std::string& nick){
 std::string		Channel::getMemberList() const{
 	std::string list;
 
-	for (std::map<int, Client>::const_iterator it = _members.begin(); it != _members.end(); ++it){
+	for (std::map<int, Client*>::const_iterator it = _members.begin(); it != _members.end(); ++it){
 		if (!list.empty())
 			list += " ";
 
 		std::map<int, bool>::const_iterator opIt = _operators.find(it->first);
 		if (opIt != _operators.end() && opIt->second)
 			list += "@";
-		list += it->second.getNickName();
+		list += it->second->getNickName();
 	}
 	return list;
 }
 
 void	Channel::broadcast(Server& server, Client& client, const std::string& msg, bool sendSelf){
-	std::map<int, Client>::iterator it = _members.begin();
+	std::map<int, Client*>::iterator it = _members.begin();
 	for (; it != _members.end(); it++){
 		if (!sendSelf && it->first == client.getFd()) continue;
-		server.sendMessage((it->second), msg);
+		if (it->second)
+			server.sendMessage(*(it->second), msg);
 	}
 }
 
 Client*	Channel::getClientByNick(const std::string& nick){
-	return Util::getObjectByString(_members, nick);
+	for (std::map<int, Client*>::iterator it = _members.begin(); it != _members.end(); ++it){
+		Client* c = it->second;
+		if (c && Util::comp(c->getNickName(), nick))
+			return c;
+	}
+	return NULL;
 }
 
 bool	Channel::isEmpty() const{
